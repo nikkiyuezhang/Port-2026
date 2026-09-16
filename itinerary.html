@@ -630,13 +630,130 @@ function escapeHTML(value) {
    We connect this next
 ========================= */
 
-function openAddActivity(dayNumber) {
+async function openAddActivity(dayNumber) {
 
-  alert(
-    "Add activity for Day " +
-    dayNumber +
-    " is ready for the next step."
-  );
+  const time =
+    prompt("Time:", "");
+
+  if (time === null) return;
+
+  const title =
+    prompt("Activity:", "");
+
+  if (title === null) return;
+
+  if (!time.trim() || !title.trim()) {
+    alert("Time and activity are required.");
+    return;
+  }
+
+  const details =
+    prompt(
+      "Notes (optional):",
+      ""
+    );
+
+  if (details === null) return;
+
+  const location =
+    prompt(
+      "Location (optional):",
+      ""
+    );
+
+  if (location === null) return;
+
+
+  let tripCode =
+    sessionStorage.getItem(
+      "port2026_trip_code"
+    );
+
+
+  if (!tripCode) {
+
+    tripCode =
+      prompt(
+        "Enter the Port 2026 Trip Code:"
+      );
+
+    if (!tripCode) return;
+  }
+
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/itinerary",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            "X-Trip-Code":
+              tripCode
+          },
+
+          body: JSON.stringify({
+            day: dayNumber,
+            time: time.trim(),
+            title: title.trim(),
+            details:
+              details.trim(),
+            location:
+              location.trim()
+          })
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (response.status === 401) {
+
+      sessionStorage.removeItem(
+        "port2026_trip_code"
+      );
+
+      alert(
+        "Incorrect Trip Code. Please try again."
+      );
+
+      return;
+    }
+
+
+    if (!data.success) {
+
+      throw new Error(
+        data.error ||
+        "Could not add activity."
+      );
+    }
+
+
+    sessionStorage.setItem(
+      "port2026_trip_code",
+      tripCode
+    );
+
+
+    await loadItinerary();
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      "Could not add activity."
+    );
+  }
 }
 
 
