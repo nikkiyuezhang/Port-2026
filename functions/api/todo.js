@@ -1,22 +1,52 @@
-// GET /api/todo
-// Read all shared todo tasks
+/* =========================
+   TRIP CODE CHECK
+========================= */
+
+function checkTripCode(context) {
+
+  const suppliedCode =
+    context.request.headers.get(
+      "X-Trip-Code"
+    );
+
+  const correctCode =
+    context.env.TRIP_CODE;
+
+
+  return (
+    correctCode &&
+    suppliedCode === correctCode
+  );
+}
+
+
+/* =========================
+   GET /api/todo
+   Anyone can read
+========================= */
 
 export async function onRequestGet(context) {
+
   try {
-    const result = await context.env.DB
-      .prepare(`
-        SELECT id, text, assignee, completed, created_at
-        FROM todo_tasks
-        ORDER BY completed ASC, id DESC
-      `)
-      .all();
+
+    const result =
+      await context.env.DB
+        .prepare(`
+          SELECT id, text, assignee, completed, created_at
+          FROM todo_tasks
+          ORDER BY completed ASC, id DESC
+        `)
+        .all();
+
 
     return Response.json({
       success: true,
       tasks: result.results
     });
 
+
   } catch (error) {
+
     return Response.json(
       {
         success: false,
@@ -28,25 +58,50 @@ export async function onRequestGet(context) {
 }
 
 
-// POST /api/todo
-// Add a new shared task
+/* =========================
+   POST /api/todo
+   Trip Code required
+========================= */
 
 export async function onRequestPost(context) {
+
   try {
-    const body = await context.request.json();
 
-    const text =
-      String(body.text || "").trim();
+    if (!checkTripCode(context)) {
 
-    const assignee =
-      String(body.assignee || "Everyone").trim();
-
-
-    if (!text) {
       return Response.json(
         {
           success: false,
-          error: "Task text is required."
+          error: "Invalid Trip Code."
+        },
+        { status: 401 }
+      );
+    }
+
+
+    const body =
+      await context.request.json();
+
+
+    const text =
+      String(
+        body.text || ""
+      ).trim();
+
+
+    const assignee =
+      String(
+        body.assignee || "Everyone"
+      ).trim();
+
+
+    if (!text) {
+
+      return Response.json(
+        {
+          success: false,
+          error:
+            "Task text is required."
         },
         { status: 400 }
       );
@@ -54,10 +109,12 @@ export async function onRequestPost(context) {
 
 
     if (text.length > 500) {
+
       return Response.json(
         {
           success: false,
-          error: "Task is too long."
+          error:
+            "Task is too long."
         },
         { status: 400 }
       );
@@ -77,25 +134,35 @@ export async function onRequestPost(context) {
     ];
 
 
-    if (!allowedAssignees.includes(assignee)) {
+    if (
+      !allowedAssignees.includes(
+        assignee
+      )
+    ) {
+
       return Response.json(
         {
           success: false,
-          error: "Invalid assignee."
+          error:
+            "Invalid assignee."
         },
         { status: 400 }
       );
     }
 
 
-    const result = await context.env.DB
-      .prepare(`
-        INSERT INTO todo_tasks
-        (text, assignee, completed)
-        VALUES (?, ?, 0)
-      `)
-      .bind(text, assignee)
-      .run();
+    const result =
+      await context.env.DB
+        .prepare(`
+          INSERT INTO todo_tasks
+          (text, assignee, completed)
+          VALUES (?, ?, 0)
+        `)
+        .bind(
+          text,
+          assignee
+        )
+        .run();
 
 
     return Response.json({
@@ -103,7 +170,9 @@ export async function onRequestPost(context) {
       id: result.meta.last_row_id
     });
 
+
   } catch (error) {
+
     return Response.json(
       {
         success: false,
@@ -115,25 +184,49 @@ export async function onRequestPost(context) {
 }
 
 
-// PATCH /api/todo
-// Update completed status
+/* =========================
+   PATCH /api/todo
+   Trip Code required
+========================= */
 
 export async function onRequestPatch(context) {
+
   try {
-    const body = await context.request.json();
+
+    if (!checkTripCode(context)) {
+
+      return Response.json(
+        {
+          success: false,
+          error: "Invalid Trip Code."
+        },
+        { status: 401 }
+      );
+    }
+
+
+    const body =
+      await context.request.json();
+
 
     const id =
       Number(body.id);
+
 
     const completed =
       body.completed ? 1 : 0;
 
 
-    if (!Number.isInteger(id) || id <= 0) {
+    if (
+      !Number.isInteger(id) ||
+      id <= 0
+    ) {
+
       return Response.json(
         {
           success: false,
-          error: "Valid task ID is required."
+          error:
+            "Valid task ID is required."
         },
         { status: 400 }
       );
@@ -146,7 +239,10 @@ export async function onRequestPatch(context) {
         SET completed = ?
         WHERE id = ?
       `)
-      .bind(completed, id)
+      .bind(
+        completed,
+        id
+      )
       .run();
 
 
@@ -154,7 +250,9 @@ export async function onRequestPatch(context) {
       success: true
     });
 
+
   } catch (error) {
+
     return Response.json(
       {
         success: false,
@@ -166,23 +264,49 @@ export async function onRequestPatch(context) {
 }
 
 
-// DELETE /api/todo?id=123
-// Delete a shared task
+/* =========================
+   DELETE /api/todo?id=123
+   Trip Code required
+========================= */
 
 export async function onRequestDelete(context) {
+
   try {
-    const url =
-      new URL(context.request.url);
 
-    const id =
-      Number(url.searchParams.get("id"));
+    if (!checkTripCode(context)) {
 
-
-    if (!Number.isInteger(id) || id <= 0) {
       return Response.json(
         {
           success: false,
-          error: "Valid task ID is required."
+          error: "Invalid Trip Code."
+        },
+        { status: 401 }
+      );
+    }
+
+
+    const url =
+      new URL(
+        context.request.url
+      );
+
+
+    const id =
+      Number(
+        url.searchParams.get("id")
+      );
+
+
+    if (
+      !Number.isInteger(id) ||
+      id <= 0
+    ) {
+
+      return Response.json(
+        {
+          success: false,
+          error:
+            "Valid task ID is required."
         },
         { status: 400 }
       );
@@ -202,7 +326,9 @@ export async function onRequestDelete(context) {
       success: true
     });
 
+
   } catch (error) {
+
     return Response.json(
       {
         success: false,
