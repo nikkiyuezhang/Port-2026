@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#17324d">
+
+<title>Port 2026 · Trip Map</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  background: #f3f5f7;
+  color: #18222c;
+}
+
+.app {
+  max-width: 520px;
+  margin: auto;
+  min-height: 100vh;
+  background: white;
+}
+
+/* HEADER */
+
+.header {
+  background: #17324d;
+  color: white;
+  padding: 28px 22px 25px;
+}
+
+.back {
+  display: inline-block;
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  margin-bottom: 22px;
+  opacity: .85;
+}
+
+.label {
+  font-size: 11px;
+  letter-spacing: 1.6px;
+  opacity: .7;
+}
+
+h1 {
+  margin: 6px 0;
+  font-size: 34px;
+}
+
+.subtitle {
+  font-size: 14px;
+  opacity: .8;
+}
+
+/* CONTENT */
+
+.content {
+  padding: 22px;
+}
+
+/* DAY TABS */
+
+.day-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.day-tab {
+  border: none;
+  padding: 12px 5px;
+  border-radius: 12px;
+  background: #eef1f3;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.day-tab.active {
+  background: #17324d;
+  color: white;
+}
+
+/* DAY */
+
+.day {
+  display: none;
+}
+
+.day.active {
+  display: block;
+}
+
+.day-heading {
+  margin-bottom: 18px;
+}
+
+.day-number {
+  font-size: 12px;
+  font-weight: 700;
+  color: #70808b;
+  letter-spacing: 1px;
+}
+
+.day-title {
+  margin-top: 4px;
+  font-size: 24px;
+  font-weight: 750;
+}
+
+/* ROUTE SUMMARY */
+
+.route-summary {
+  background: #eef6fa;
+  border-radius: 18px;
+  padding: 17px;
+  margin-bottom: 23px;
+}
+
+.route-summary-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #647985;
+  letter-spacing: .8px;
+}
+
+.route-summary-text {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ROUTE */
+
+.route {
+  margin-left: 8px;
+}
+
+.stop {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  min-height: 115px;
+}
+
+.marker-column {
+  position: relative;
+}
+
+.marker {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #17324d;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  position: relative;
+  z-index: 2;
+}
+
+.stop:not(:last-child) .marker-column::after {
+  content: "";
+  position: absolute;
+  width: 2px;
+  background: #d9e0e4;
+  top: 30px;
+  bottom: 0;
+  left: 14px;
+}
+
+.stop-content {
+  padding: 2px 0 25px 12px;
+}
+
+.stop-time {
+  font-size: 11px;
+  font-weight: 700;
+  color: #7c8991;
+  margin-bottom: 4px;
+}
+
+.stop-name {
+  font-size: 16px;
+  font-weight: 750;
+}
+
+.stop-note {
+  margin-top: 5px;
+  color: #69767e;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+/* ACTIONS */
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.action {
+  text-decoration: none;
+  padding: 8px 11px;
+  background: #edf4f7;
+  color: #17324d;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* FULL ROUTE */
+
+.full-route {
+  display: block;
+  width: 100%;
+  text-align: center;
+  text-decoration: none;
+  padding: 15px;
+  margin-top: 8px;
+  margin-bottom: 28px;
+  border-radius: 14px;
+  background: #17324d;
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* TBD */
+
+.tbd {
+  background: #f4f5f6;
+  border-radius: 17px;
+  padding: 22px;
+  text-align: center;
+  color: #68747c;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* WEATHER */
+
+.weather-dependent {
+  display: inline-block;
+  margin-top: 7px;
+  padding: 5px 8px;
+  border-radius: 7px;
+  background: #fff4d8;
+  color: #735d20;
+  font-size: 10px;
+}
+
+/* FOOTER */
+
+.footer {
+  text-align: center;
+  color: #a0a5a9;
+  font-size: 11px;
+  padding: 10px 0 30px;
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div class="app">
+
+<header class="header">
+
+<a class="back" href="index.html">
+← Port 2026
+</a>
+
+<div class="label">
+PLACES & NAVIGATION
+</div>
+
+<h1>Trip Map</h1>
+
+<div class="subtitle">
+Armidale ↔ Port Macquarie
+</div>
+
+</header>
+
+
+<main class="content">
+
+
+<div class="day-tabs">
+
+<button
+class="day-tab active"
+onclick="showDay(1)">
+Day 1
+</button>
+
+<button
+class="day-tab"
+onclick="showDay(2)">
+Day 2
+</button>
+
+<button
+class="day-tab"
+onclick="showDay(3)">
+Day 3
+</button>
+
+</div>
+
+
+<!-- DAY 1 -->
+
+<section class="day active" id="day1">
+
+<div class="day-heading">
+
+<div class="day-number">
+DAY 1
+</div>
+
+<div class="day-title">
+Saturday · 3 October
+</div>
+
+</div>
+
+
+<div class="route-summary">
+
+<div class="route-summary-title">
+TODAY'S ROUTE
+</div>
+
+<div class="route-summary-text">
+Armidale → Port Macquarie → Airbnb → Town Beach
+</div>
+
+</div>
+
+
+<div class="route">
+
+
+<!-- STOP 1 -->
+
+<div class="stop">
+
+<div class="marker-column">
+<div class="marker">1</div>
+</div>
+
+<div class="stop-content">
+
+<div class="stop-time">
+9:00–10:00 AM
+</div>
+
+<div class="stop-name">
+Armidale
+</div>
+
+<div class="stop-note">
+Road trip starts here.
+</div>
+
+<div class="actions">
+
+<a
+class="action"
+href="https://www.google.com/maps/search/?api=1&query=Armidale+NSW"
+target="_blank">
+View Map ↗
+</a>
+
+</div>
+
+</div>
+</div>
+
+
+<!-- STOP 2 -->
+
+<div class="stop">
+
+<div class="marker-column">
+<div class="marker">2</div>
+</div>
+
+<div class="stop-content">
+
+<div class="stop-time">
+1:00–2:00 PM
+</div>
+
+<div class="stop-name">
+Port Macquarie
+</div>
+
+<div class="stop-note">
+Arrive in Port Macquarie.
+</div>
+
+<div class="actions">
+
+<a
+class="action"
+href="https://www.google.com/maps/dir/?api=1&destination=Port+Macquarie+NSW"
+target="_blank">
+Navigate ↗
+</a>
+
+</div>
+
+</div>
+</div>
+
+
+<!-- STOP 3 -->
+
+<div class="stop">
+
+<div class="marker-column">
+<div class="marker">3</div>
+</div>
+
+<div class="stop-content">
+
+<div class="stop-time">
+2:00 PM
+</div>
+
+<div class="stop-name">
+Airbnb
+</div>
+
+<div class="stop-note">
+15 McIntyre Close<br>
+Port Macquarie NSW 2444
+</div>
+
+<div class="actions">
+
+<a
+class="action"
+href="https://www.google.com/maps/search/?api=1&query=15+McIntyre+Close+Port+Macquarie+NSW+2444"
+target="_blank">
+View Map ↗
+</a>
+
+<a
+class="action"
+href="https://www.google.com/maps/dir/?api=1&destination=15+McIntyre+Close+Port+Macquarie+NSW+2444"
+target="_blank">
+Navigate ↗
+</a>
+
+</div>
+
+</div>
+</div>
+
+
+<!-- STOP 4 -->
+
+<div class="stop">
+
+<div class="marker-column">
+<div class="marker">4</div>
+</div>
+
+<div class="stop-content">
+
+<div class="stop-time">
+5:00 PM
+</div>
+
+<div class="stop-name">
+Town Beach
+</div>
+
+<div class="stop-note">
+Beach time before dinner.
+</div>
+
+<div class="actions">
+
+<a
+class="action"
+href="https://www.google.com/maps/search/?api=1&query=Town+Beach+Port+Macquarie"
+target="_blank">
+View Map ↗
+</a>
+
+<a
+class="action"
+href="https://www.google.com/maps/dir/?api=1&destination=Town+Beach+Port+Macquarie"
+target="_blank">
+Navigate ↗
+</a>
+
+</div>
+
+</div>
+</div>
+
+</div>
+
+
+<a
+class="full-route"
+href="https://www.google.com/maps/dir/?api=1&origin=Armidale+NSW&destination=Town+Beach+Port+Macquarie&waypoints=15+McIntyre+Close+Port+Macquarie+NSW+2444"
+target="_blank">
+🚙 Open Day 1 Route
+</a>
+
+</section>
+
+
+
+<!-- DAY 2 -->
+
+<section class="day" id="day2">
+
+<div class="day-heading">
+
+<div class="day-number">
+DAY 2
+</div>
+
+<div class="day-title">
+Sunday · 4 October
+</div>
+
+</div>
+
+
+<div class="tbd">
+
+🌴 <strong>Day 2 is still open.</strong>
+
+<br><br>
+
+Once activities are decided, the locations and route will appear here.
+
+</div>
+
+</section>
+
+
+
+<!-- DAY 3 -->
+
+<section class="day" id="day3">
+
+<div class="day-heading">
+
+<div class="day-number">
+DAY 3
+</div>
+
+<div class="day-title">
+Monday · 5 October
+</div>
+
+</div>
+
+
+<div class="route-summary">
+
+<div class="route-summary-title">
+TODAY'S ROUTE
+</div>
+
+<div class="route-summary-text">
+Airbnb → Brunch → WildNets → Ricardoes → Lunch → Armidale
+</div>
+
+</div>
+
+
+<div class="route">
+
+
+<!-- STOP 1 -->
+
+<div class="stop">
+
+<div class="marker-column">
+<div class="marker">1</div>
+</div>
+
+<div class="stop-content">
+
+<div class="stop-time">
+9:30 AM
+</div>
+
+<div class="stop-name">
+Airbnb Checkout
+</div>
+
+<div class="stop-note">
+15 McIntyre Close, Port Macquarie
+</div>
+
+<div class="actions">
+
+<a
+class="action"
+href="https://www.google.com/maps/search/?api=1&query=15+McIntyre+Close+Port+Macquarie+NSW+2444"
+target="_blank">
+View Map ↗
+</a>
+
+</div>
+
+</div>
+</div>
+
+
+<!-- STOP 2 -->
+
+<div class="stop">
+
+<div class="marker-column">
+<div class="marker">2</div>
+</div>
+
+<div class="stop-content">
+
+<div class="stop-time">
+10:00 AM
+</div>
+
+<div class="stop-name">
+Breakfast / Brunch
+</div>
+
+<div class="stop-note">
+Venue TBD.
+</div>
+
+</div>
+</div>
+
+
+<!-- STOP 3 -->
+
+<div class="stop">
+
+<div class="marker-column">
+<div class="marker">3</div>
+</div>
+
+<div class="stop-content">
+
+<div class="stop-time">
+11:30 AM
+</div>
+
+<div class="stop-name">
+WildNets Adventure Park
+</div>
+
+<div class="stop-note">
+Port Macquarie adventure session.
+</div>
+
+<div class="weather-dependent">
+☀ Weather dependent
+</div>
+
+<div class="actions">
+
+<a
+class="action"
+href="https://www.google.com/maps/search/?api=1&query=WildNets+Adventure+Park+Port+Macquarie"
+target="_blank">
+View Map ↗
+</a>
+
+<a
+class="action"
+href="https://www.google.com/maps/dir/?api=1&destination=WildNets+Adventure+Park+Port+Macquarie"
+target="_blank">
+Navigate ↗
+</a>
+
+</div>
+
+</div>
+</div>
+
+
+<!-- STOP 4 -->
+
+<div class="stop">
+
+<div class="marker-column">
+<div class="marker">4</div>
+</div>
+
+<div class="stop-content">
+
+<div class="stop-time">
+1:00 PM
+</div>
+
+<div class="stop-name">
+Ricardoes Tomatoes
+</div>
+
+<div class="stop-note">
+Strawberry picking.
+</div>
+
+<div class="actions">
+
+<a
+class="action"
+href="https://www.google.com/maps/search/?api=1&query=Ricardoes+Tomatoes+Port+Macquarie"
+target="_blank">
+View Map ↗
+</a>
+
+<a
+class="action"
+href="https://www.google.com/maps/dir/?api=1&destination=Ricardoes+Tomatoes+Port+Macquarie"
+target="_blank">
+Navigate ↗
+</a>
+
+</div>
+
+</div>
+</div>
+
+
+<!-- STOP 5 -->
+
+<div class="stop">
+
+<div class="marker-column">
+<div class="marker">5</div>
+</div>
+
+<div class="stop-content">
+
+<div class="stop-time">
+2:00 PM
+</div>
+
+<div class="stop-name">
+Lunch
+</div>
+
+<div class="stop-note">
+Venue TBD.
+</div>
+
+</div>
+</div>
+
+
+<!-- STOP 6 -->
+
+<div class="stop">
+
+<div class="marker-column">
+<div class="marker">6</div>
+</div>
+
+<div class="stop-content">
+
+<div class="stop-time">
+After Lunch
+</div>
+
+<div class="stop-name">
+Armidale
+</div>
+
+<div class="stop-note">
+Drive home.
+</div>
+
+<div class="actions">
+
+<a
+class="action"
+href="https://www.google.com/maps/dir/?api=1&destination=Armidale+NSW"
+target="_blank">
+Navigate Home ↗
+</a>
+
+</div>
+
+</div>
+</div>
+
+
+</div>
+
+
+<a
+class="full-route"
+href="https://www.google.com/maps/dir/?api=1&origin=15+McIntyre+Close+Port+Macquarie+NSW+2444&destination=Armidale+NSW&waypoints=WildNets+Adventure+Park+Port+Macquarie%7CRicardoes+Tomatoes+Port+Macquarie"
+target="_blank">
+🚙 Open Day 3 Route
+</a>
+
+</section>
+
+
+<div class="footer">
+Port 2026 · Places & Navigation
+</div>
+
+
+</main>
+
+</div>
+
+
+<script>
+
+function showDay(dayNumber) {
+
+  const days =
+    document.querySelectorAll(".day");
+
+  const tabs =
+    document.querySelectorAll(".day-tab");
+
+  days.forEach(day =>
+    day.classList.remove("active")
+  );
+
+  tabs.forEach(tab =>
+    tab.classList.remove("active")
+  );
+
+  document
+    .getElementById("day" + dayNumber)
+    .classList.add("active");
+
+  tabs[dayNumber - 1]
+    .classList.add("active");
+}
+
+</script>
+
+</body>
+</html>
