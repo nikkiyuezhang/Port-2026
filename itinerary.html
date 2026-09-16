@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#17324d">
+
+<title>Port 2026 · Itinerary</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  background: #f3f5f7;
+  color: #18222c;
+}
+
+.app {
+  max-width: 520px;
+  margin: auto;
+  min-height: 100vh;
+  background: white;
+}
+
+.header {
+  background: #17324d;
+  color: white;
+  padding: 28px 22px 24px;
+}
+
+.back {
+  display: inline-block;
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  margin-bottom: 22px;
+  opacity: .85;
+}
+
+.label {
+  font-size: 11px;
+  letter-spacing: 1.6px;
+  opacity: .7;
+}
+
+h1 {
+  margin: 6px 0;
+  font-size: 34px;
+}
+
+.trip-date {
+  font-size: 14px;
+  opacity: .8;
+}
+
+.content {
+  padding: 22px;
+}
+
+/* DAY SELECTOR */
+
+.day-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 26px;
+}
+
+.day-tab {
+  border: none;
+  padding: 12px 5px;
+  border-radius: 12px;
+  background: #eef1f3;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.day-tab.active {
+  background: #17324d;
+  color: white;
+}
+
+/* DAY */
+
+.day {
+  display: none;
+}
+
+.day.active {
+  display: block;
+}
+
+.day-heading {
+  margin-bottom: 20px;
+}
+
+.day-number {
+  font-size: 12px;
+  font-weight: 700;
+  color: #70808b;
+  letter-spacing: 1px;
+}
+
+.day-title {
+  margin-top: 4px;
+  font-size: 25px;
+  font-weight: 750;
+}
+
+/* ACTIVITY */
+
+.activity {
+  display: grid;
+  grid-template-columns: 75px 1fr;
+  gap: 12px;
+  position: relative;
+}
+
+.time {
+  font-size: 12px;
+  font-weight: 700;
+  color: #65727b;
+  padding-top: 4px;
+}
+
+.event {
+  border-left: 2px solid #e3e8eb;
+  padding: 0 0 25px 18px;
+  position: relative;
+}
+
+.event::before {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: 4px;
+  width: 10px;
+  height: 10px;
+  background: #17324d;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+.event-icon {
+  font-size: 20px;
+  margin-bottom: 5px;
+}
+
+.event-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.event-note {
+  margin-top: 5px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #68747c;
+}
+
+.address {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #68747c;
+}
+
+/* BUTTONS */
+
+.actions {
+  margin-top: 11px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.map-button {
+  display: inline-block;
+  text-decoration: none;
+  color: #17324d;
+  background: #edf4f7;
+  padding: 8px 11px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* TBD */
+
+.tbd {
+  background: #f5f6f7;
+  padding: 17px;
+  border-radius: 15px;
+  color: #68747c;
+  font-size: 13px;
+}
+
+/* WEATHER WARNING */
+
+.weather-note {
+  display: inline-block;
+  margin-top: 7px;
+  padding: 5px 8px;
+  background: #fff4d8;
+  border-radius: 7px;
+  font-size: 11px;
+  color: #735d20;
+}
+
+/* FOOTER */
+
+.footer {
+  text-align: center;
+  color: #a0a5a9;
+  font-size: 11px;
+  padding: 15px 0 30px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<header class="header">
+
+<a class="back" href="index.html">
+  ← Port 2026
+</a>
+
+<div class="label">
+  OUR TRIP
+</div>
+
+<h1>Itinerary</h1>
+
+<div class="trip-date">
+  3 — 5 October 2026
+</div>
+
+</header>
+
+
+<main class="content">
+
+<div class="day-tabs">
+
+<button class="day-tab active"
+onclick="showDay(1)">
+Day 1
+</button>
+
+<button class="day-tab"
+onclick="showDay(2)">
+Day 2
+</button>
+
+<button class="day-tab"
+onclick="showDay(3)">
+Day 3
+</button>
+
+</div>
+
+
+<!-- DAY 1 -->
+
+<section class="day active" id="day1">
+
+<div class="day-heading">
+<div class="day-number">DAY 1</div>
+<div class="day-title">Saturday · 3 October</div>
+</div>
+
+
+<div class="activity">
+
+<div class="time">
+9:00–10:00
+</div>
+
+<div class="event">
+
+<div class="event-icon">🚙</div>
+
+<div class="event-title">
+Leave Armidale
+</div>
+
+<div class="event-note">
+Road trip begins.
+</div>
+
+<div class="actions">
+
+<a class="map-button"
+href="https://www.google.com/maps/dir/?api=1&destination=Port+Macquarie+NSW"
+target="_blank">
+Navigate ↗
+</a>
+
+</div>
+
+</div>
+</div>
+
+
+<div class="activity">
+
+<div class="time">
+1:00–2:00
+</div>
+
+<div class="event">
+
+<div class="event-icon">🌊</div>
+
+<div class="event-title">
+Arrive Port Macquarie
+</div>
+
+<div class="event-note">
+Welcome to Port!
+</div>
+
+</div>
+</div>
+
+
+<div class="activity">
+
+<div class="time">
+2:00 PM
+</div>
+
+<div class="event">
+
+<div class="event-icon">🏡</div>
+
+<div class="event-title">
+Airbnb Check-in
+</div>
+
+<div class="address">
+15 McIntyre Close<br>
+Port Macquarie NSW 2444
+</div>
+
+<div class="actions">
+
+<a class="map-button"
+href="https://www.google.com/maps/search/?api=1&query=15+McIntyre+Close+Port+Macquarie+NSW+2444"
+target="_blank">
+Map ↗
+</a>
+
+<a class="map-button"
+href="https://www.google.com/maps/dir/?api=1&destination=15+McIntyre+Close+Port+Macquarie+NSW+2444"
+target="_blank">
+Navigate ↗
+</a>
+
+</div>
+
+</div>
+</div>
+
+
+<div class="activity">
+
+<div class="time">
+5:00 PM
+</div>
+
+<div class="event">
+
+<div class="event-icon">🏖️</div>
+
+<div class="event-title">
+Town Beach
+</div>
+
+<div class="event-note">
+Beach time and afternoon walk.
+</div>
+
+<div class="actions">
+
+<a class="map-button"
+href="https://www.google.com/maps/search/?api=1&query=Town+Beach+Port+Macquarie"
+target="_blank">
+Map ↗
+</a>
+
+<a class="map-button"
+href="https://www.google.com/maps/dir/?api=1&destination=Town+Beach+Port+Macquarie"
+target="_blank">
+Navigate ↗
+</a>
+
+</div>
+
+</div>
+</div>
+
+
+<div class="activity">
+
+<div class="time">
+Evening
+</div>
+
+<div class="event">
+
+<div class="event-icon">🍽️</div>
+
+<div class="event-title">
+Dinner
+</div>
+
+<div class="event-note">
+Venue to be decided.
+</div>
+
+</div>
+</div>
+
+</section>
+
+
+
+<!-- DAY 2 -->
+
+<section class="day" id="day2">
+
+<div class="day-heading">
+<div class="day-number">DAY 2</div>
+<div class="day-title">Sunday · 4 October</div>
+</div>
+
+<div class="tbd">
+🌴 Day 2 plans are still open.<br><br>
+Activities, food and places can be added later.
+</div>
+
+</section>
+
+
+
+<!-- DAY 3 -->
+
+<section class="day" id="day3">
+
+<div class="day-heading">
+<div class="day-number">DAY 3</div>
+<div class="day-title">Monday · 5 October</div>
+</div>
+
+
+<div class="activity">
+
+<div class="time">
+9:00 AM
+</div>
+
+<div class="event">
+
+<div class="event-icon">🧹</div>
+
+<div class="event-title">
+Clean up
+</div>
+
+<div class="event-note">
+Pack up and get the Airbnb ready for checkout.
+</div>
+
+</div>
+</div>
+
+
+<div class="activity">
+
+<div class="time">
+9:30 AM
+</div>
+
+<div class="event">
+
+<div class="event-icon">🏡</div>
+
+<div class="event-title">
+Airbnb Checkout
+</div>
+
+</div>
+</div>
+
+
+<div class="activity">
+
+<div class="time">
+10:00 AM
+</div>
+
+<div class="event">
+
+<div class="event-icon">☕</div>
+
+<div class="event-title">
+Breakfast / Brunch
+</div>
+
+<div class="event-note">
+Venue TBD.
+</div>
+
+</div>
+</div>
+
+
+<div class="activity">
+
+<div class="time">
+11:30 AM
+</div>
+
+<div class="event">
+
+<div class="event-icon">🌳</div>
+
+<div class="event-title">
+WildNets Adventure Park
+</div>
+
+<div class="event-note">
+Port Macquarie adventure session.
+</div>
+
+<div class="weather-note">
+☀ Weather dependent
+</div>
+
+<div class="actions">
+
+<a class="map-button"
+href="https://www.google.com/maps/search/?api=1&query=WildNets+Adventure+Park+Port+Macquarie"
+target="_blank">
+Map ↗
+</a>
+
+<a class="map-button"
+href="https://www.google.com/maps/dir/?api=1&destination=WildNets+Adventure+Park+Port+Macquarie"
+target="_blank">
+Navigate ↗
+</a>
+
+</div>
+
+</div>
+</div>
+
+
+<div class="activity">
+
+<div class="time">
+1:00 PM
+</div>
+
+<div class="event">
+
+<div class="event-icon">🍓</div>
+
+<div class="event-title">
+Ricardoes Tomatoes
+</div>
+
+<div class="event-note">
+Strawberry picking.
+</div>
+
+<div class="actions">
+
+<a class="map-button"
+href="https://www.google.com/maps/search/?api=1&query=Ricardoes+Tomatoes+Port+Macquarie"
+target="_blank">
+Map ↗
+</a>
+
+<a class="map-button"
+href="https://www.google.com/maps/dir/?api=1&destination=Ricardoes+Tomatoes+Port+Macquarie"
+target="_blank">
+Navigate ↗
+</a>
+
+</div>
+
+</div>
+</div>
+
+
+<div class="activity">
+
+<div class="time">
+2:00 PM
+</div>
+
+<div class="event">
+
+<div class="event-icon">🍴</div>
+
+<div class="event-title">
+Lunch
+</div>
+
+<div class="event-note">
+Venue TBD.
+</div>
+
+</div>
+</div>
+
+
+<div class="activity">
+
+<div class="time">
+After lunch
+</div>
+
+<div class="event">
+
+<div class="event-icon">🚙</div>
+
+<div class="event-title">
+Drive Home
+</div>
+
+<div class="event-note">
+Port Macquarie → Armidale
+</div>
+
+<div class="actions">
+
+<a class="map-button"
+href="https://www.google.com/maps/dir/?api=1&destination=Armidale+NSW"
+target="_blank">
+Navigate Home ↗
+</a>
+
+</div>
+
+</div>
+</div>
+
+</section>
+
+
+<div class="footer">
+Port 2026 · Our Labour Day getaway
+</div>
+
+</main>
+
+</div>
+
+
+<script>
+
+function showDay(dayNumber) {
+
+  const days =
+    document.querySelectorAll(".day");
+
+  const tabs =
+    document.querySelectorAll(".day-tab");
+
+  days.forEach(day =>
+    day.classList.remove("active")
+  );
+
+  tabs.forEach(tab =>
+    tab.classList.remove("active")
+  );
+
+  document
+    .getElementById("day" + dayNumber)
+    .classList.add("active");
+
+  tabs[dayNumber - 1]
+    .classList.add("active");
+}
+
+</script>
+
+</body>
+</html>
