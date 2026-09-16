@@ -457,345 +457,362 @@ Port 2026 · To-do
 
 <script>
 
-const TODO_STORAGE_KEY =
-  "port2026_todo";
-
-
-function getTasks() {
-
-  try {
-
-    return JSON.parse(
-      localStorage.getItem(
-        TODO_STORAGE_KEY
-      )
-    ) || [];
-
-  }
-
-  catch {
-
-    return [];
-
-  }
-
-}
-
-
-function saveTasks(tasks) {
-
-  localStorage.setItem(
-    TODO_STORAGE_KEY,
-    JSON.stringify(tasks)
-  );
-
-}
-
-
-function initials(name) {
-
-  if (name === "Everyone") {
-    return "ALL";
-  }
-
-  return name
-    .split(" ")
-    .map(word => word[0])
-    .join("")
-    .substring(0, 2)
-    .toUpperCase();
-
-}
+/* =========================
+   PORT 2026 SHARED TODO
+   Cloudflare D1 version
+========================= */
 
 
 function escapeHTML(text) {
-
-  const div =
-    document.createElement("div");
-
+  const div = document.createElement("div");
   div.textContent = text;
-
   return div.innerHTML;
-
 }
 
 
-function addTask() {
+/* =========================
+   LOAD SHARED TASKS
+========================= */
+
+async function loadTasks() {
+
+  try {
+
+    const response = await fetch(
+      "/api/todo",
+      {
+        cache: "no-store"
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(
+        data.error || "Could not load tasks."
+      );
+    }
+
+    renderTasks(data.tasks || []);
+
+  } catch (error) {
+
+    console.error(error);
+
+    const list =
+      document.getElementById("todoList");
+
+    if (list) {
+      list.innerHTML = `
+        <div class="empty">
+          Couldn't load the shared to-do list.
+        </div>
+      `;
+    }
+  }
+}
+
+
+/* =========================
+   DISPLAY TASKS
+========================= */
+
+function renderTasks(tasks) {
+
+  const list =
+    document.getElementById("todoList");
+
+  if (!list) return;
+
+
+  if (tasks.length === 0) {
+
+    list.innerHTML = `
+      <div class="empty">
+        Nothing to do yet. Add the first trip task.
+      </div>
+    `;
+
+    updateProgress(tasks);
+
+    return;
+  }
+
+
+  list.innerHTML =
+    tasks.map(task => {
+
+      const completed =
+        Number(task.completed) === 1;
+
+      return `
+        <div class="todo-item ${completed ? "completed" : ""}">
+
+          <button
+            class="check-button"
+            onclick="toggleTask(${Number(task.id)}, ${completed ? "false" : "true"})"
+            aria-label="Toggle task">
+            ${completed ? "✓" : ""}
+          </button>
+
+          <div class="todo-content">
+
+            <div class="todo-text">
+              ${escapeHTML(task.text)}
+            </div>
+
+            <div class="todo-assignee">
+              ${escapeHTML(task.assignee)}
+            </div>
+
+          </div>
+
+          <button
+            class="delete-button"
+            onclick="deleteTask(${Number(task.id)})"
+            aria-label="Delete task">
+            ×
+          </button>
+
+        </div>
+      `;
+
+    }).join("");
+
+
+  updateProgress(tasks);
+}
+
+
+/* =========================
+   PROGRESS
+========================= */
+
+function updateProgress(tasks) {
+
+  const total = tasks.length;
+
+  const completed =
+    tasks.filter(
+      task => Number(task.completed) === 1
+    ).length;
+
+
+  const progressText =
+    document.getElementById("progressText");
+
+  const progressFill =
+    document.getElementById("progressFill");
+
+
+  if (progressText) {
+
+    progressText.textContent =
+      total === 0
+        ? "0 of 0 completed"
+        : `${completed} of ${total} completed`;
+
+  }
+
+
+  if (progressFill) {
+
+    const percentage =
+      total === 0
+        ? 0
+        : (completed / total) * 100;
+
+    progressFill.style.width =
+      `${percentage}%`;
+
+  }
+}
+
+
+/* =========================
+   ADD SHARED TASK
+========================= */
+
+async function addTask() {
 
   const input =
-    document.getElementById(
-      "taskInput"
-    );
+    document.getElementById("taskInput");
+
+  const assigneeSelect =
+    document.getElementById("assigneeSelect");
+
 
   const text =
     input.value.trim();
 
   const assignee =
-    document.getElementById(
-      "assigneeSelect"
-    ).value;
+    assigneeSelect.value;
 
 
   if (!text) {
 
-    alert(
-      "Add a task first."
-    );
+    alert("Write a task first.");
 
     return;
-
   }
 
 
-  const tasks =
-    getTasks();
+  try {
 
+    const response = await fetch(
+      "/api/todo",
+      {
+        method: "POST",
 
-  tasks.push({
+        headers: {
+          "Content-Type": "application/json"
+        },
 
-    id:
-      Date.now().toString(),
-
-    text:
-      text,
-
-    assignee:
-      assignee,
-
-    completed:
-      false,
-
-    created:
-      new Date().toISOString()
-
-  });
-
-
-  saveTasks(tasks);
-
-  input.value = "";
-
-  renderTasks();
-
-}
-
-
-function toggleTask(id) {
-
-  const tasks =
-    getTasks();
-
-
-  const task =
-    tasks.find(
-      task => task.id === id
+        body: JSON.stringify({
+          text,
+          assignee
+        })
+      }
     );
 
 
-  if (task) {
-
-    task.completed =
-      !task.completed;
-
-  }
+    const data =
+      await response.json();
 
 
-  saveTasks(tasks);
+    if (!response.ok || !data.success) {
 
-  renderTasks();
-
-}
-
-
-function deleteTask(id) {
-
-  const tasks =
-    getTasks()
-      .filter(
-        task => task.id !== id
+      throw new Error(
+        data.error ||
+        "Could not add task."
       );
-
-
-  saveTasks(tasks);
-
-  renderTasks();
-
-}
-
-
-function taskHTML(task) {
-
-  return `
-
-  <div class="task ${task.completed ? "completed" : ""}">
-
-    <div
-      class="check"
-      onclick="toggleTask('${task.id}')">
-
-      ${task.completed ? "✓" : ""}
-
-    </div>
-
-
-    <div>
-
-      <div class="task-name">
-        ${escapeHTML(task.text)}
-      </div>
-
-
-      <div class="assignee">
-
-        <div class="avatar">
-          ${initials(task.assignee)}
-        </div>
-
-        <div class="assignee-name">
-          ${escapeHTML(task.assignee)}
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <button
-      class="delete"
-      onclick="deleteTask('${task.id}')"
-      aria-label="Delete task">
-      ×
-    </button>
-
-  </div>
-
-  `;
-
-}
-
-
-function renderTasks() {
-
-  const tasks =
-    getTasks();
-
-
-  const open =
-    tasks.filter(
-      task => !task.completed
-    );
-
-
-  const completed =
-    tasks.filter(
-      task => task.completed
-    );
-
-
-  const openContainer =
-    document.getElementById(
-      "openTasks"
-    );
-
-
-  const completedContainer =
-    document.getElementById(
-      "completedTasks"
-    );
-
-
-  if (open.length === 0) {
-
-    openContainer.innerHTML = `
-
-      <div class="empty">
-        🎉 Nothing left to do.
-      </div>
-
-    `;
-
-  } else {
-
-    openContainer.innerHTML =
-      open
-        .map(taskHTML)
-        .join("");
-
-  }
-
-
-  if (completed.length === 0) {
-
-    completedContainer.innerHTML = `
-
-      <div class="empty">
-        Completed tasks will appear here.
-      </div>
-
-    `;
-
-  } else {
-
-    completedContainer.innerHTML =
-      completed
-        .slice()
-        .reverse()
-        .map(taskHTML)
-        .join("");
-
-  }
-
-
-  /* PROGRESS */
-
-  const total =
-    tasks.length;
-
-  const done =
-    completed.length;
-
-
-  document.getElementById(
-    "progressNumber"
-  ).textContent =
-    `${done} / ${total} done`;
-
-
-  const percent =
-    total === 0
-      ? 0
-      : (done / total) * 100;
-
-
-  document.getElementById(
-    "progressFill"
-  ).style.width =
-    percent + "%";
-
-}
-
-
-renderTasks();
-
-
-/* ENTER KEY */
-
-document.getElementById(
-  "taskInput"
-).addEventListener(
-  "keydown",
-  function(event) {
-
-    if (event.key === "Enter") {
-
-      event.preventDefault();
-
-      addTask();
-
     }
 
+
+    input.value = "";
+
+    await loadTasks();
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      "Couldn't add this task. Please try again."
+    );
   }
-);
+}
+
+
+/* =========================
+   COMPLETE / UNCOMPLETE
+========================= */
+
+async function toggleTask(id, completed) {
+
+  try {
+
+    const response = await fetch(
+      "/api/todo",
+      {
+        method: "PATCH",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          id,
+          completed
+        })
+      }
+    );
+
+
+    const data =
+      await response.json();
+
+
+    if (!response.ok || !data.success) {
+
+      throw new Error(
+        data.error ||
+        "Could not update task."
+      );
+    }
+
+
+    await loadTasks();
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      "Couldn't update this task. Please try again."
+    );
+  }
+}
+
+
+/* =========================
+   DELETE SHARED TASK
+========================= */
+
+async function deleteTask(id) {
+
+  const confirmed =
+    confirm("Delete this task?");
+
+
+  if (!confirmed) return;
+
+
+  try {
+
+    const response = await fetch(
+      "/api/todo?id=" +
+      encodeURIComponent(id),
+      {
+        method: "DELETE"
+      }
+    );
+
+
+    const data =
+      await response.json();
+
+
+    if (!response.ok || !data.success) {
+
+      throw new Error(
+        data.error ||
+        "Could not delete task."
+      );
+    }
+
+
+    await loadTasks();
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      "Couldn't delete this task. Please try again."
+    );
+  }
+}
+
+
+/* =========================
+   START
+========================= */
+
+loadTasks();
 
 </script>
 
