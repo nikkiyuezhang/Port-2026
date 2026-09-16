@@ -329,39 +329,12 @@ Port 2026 · Trip Board
 </main>
 
 </div>
-
-
 <script>
 
-const STORAGE_KEY =
-  "port2026_trip_board";
-
-
-function getNotes() {
-
-  try {
-
-    return JSON.parse(
-      localStorage.getItem(STORAGE_KEY)
-    ) || [];
-
-  } catch {
-
-    return [];
-
-  }
-
-}
-
-
-function saveNotes(notes) {
-
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(notes)
-  );
-
-}
+/* =========================
+   PORT 2026 SHARED BOARD
+   Cloudflare D1 version
+========================= */
 
 
 function initials(name) {
@@ -372,24 +345,6 @@ function initials(name) {
     .join("")
     .substring(0, 2)
     .toUpperCase();
-
-}
-
-
-function formatTime(timestamp) {
-
-  const date =
-    new Date(timestamp);
-
-  return date.toLocaleString(
-    "en-AU",
-    {
-      day: "numeric",
-      month: "short",
-      hour: "numeric",
-      minute: "2-digit"
-    }
-  );
 
 }
 
@@ -406,10 +361,141 @@ function escapeHTML(text) {
 }
 
 
-function renderNotes() {
+function formatTime(timestamp) {
 
-  const notes =
-    getNotes();
+  if (!timestamp) return "";
+
+  /*
+    D1 CURRENT_TIMESTAMP is stored in UTC.
+    Add Z so the browser correctly converts it
+    to the viewer's local time.
+  */
+
+  let value = timestamp;
+
+  if (
+    !value.endsWith("Z") &&
+    !value.includes("+")
+  ) {
+
+    value =
+      value.replace(" ", "T") + "Z";
+
+  }
+
+
+  const date =
+    new Date(value);
+
+
+  return date.toLocaleString(
+    "en-AU",
+    {
+      day: "numeric",
+      month: "short",
+      hour: "numeric",
+      minute: "2-digit"
+    }
+  );
+
+}
+
+
+/* =========================
+   LOAD SHARED NOTES
+========================= */
+
+async function loadNotes() {
+
+  const board =
+    document.getElementById("board");
+
+
+  board.innerHTML = `
+
+    <div class="empty">
+
+      <div class="empty-icon">
+        ☁️
+      </div>
+
+      <div class="empty-title">
+        Loading board...
+      </div>
+
+    </div>
+
+  `;
+
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/board",
+        {
+          cache: "no-store"
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (
+      !response.ok ||
+      !data.success
+    ) {
+
+      throw new Error(
+        data.error ||
+        "Could not load board."
+      );
+
+    }
+
+
+    renderNotes(
+      data.notes || []
+    );
+
+
+  } catch (error) {
+
+    console.error(error);
+
+
+    board.innerHTML = `
+
+      <div class="empty">
+
+        <div class="empty-icon">
+          ⚠️
+        </div>
+
+        <div class="empty-title">
+          Couldn't load the board
+        </div>
+
+        <div class="empty-text">
+          Check your connection and refresh.
+        </div>
+
+      </div>
+
+    `;
+
+  }
+
+}
+
+
+/* =========================
+   DISPLAY NOTES
+========================= */
+
+function renderNotes(notes) {
 
   const board =
     document.getElementById("board");
@@ -418,6 +504,7 @@ function renderNotes() {
   if (notes.length === 0) {
 
     board.innerHTML = `
+
       <div class="empty">
 
         <div class="empty-icon">
@@ -433,6 +520,7 @@ function renderNotes() {
         </div>
 
       </div>
+
     `;
 
     return;
@@ -442,8 +530,6 @@ function renderNotes() {
 
   board.innerHTML =
     notes
-      .slice()
-      .reverse()
       .map(note => `
 
         <div class="note">
@@ -462,21 +548,24 @@ function renderNotes() {
 
             </div>
 
+
             <button
               class="delete"
-              onclick="deleteNote('${note.id}')"
+              onclick="deleteNote(${Number(note.id)})"
               aria-label="Delete note">
               ×
             </button>
 
           </div>
 
+
           <div class="note-text">
             ${escapeHTML(note.text)}
           </div>
 
+
           <div class="note-time">
-            ${formatTime(note.created)}
+            ${formatTime(note.created_at)}
           </div>
 
         </div>
@@ -487,17 +576,23 @@ function renderNotes() {
 }
 
 
-function addNote() {
+/* =========================
+   ADD SHARED NOTE
+========================= */
+
+async function addNote() {
 
   const input =
     document.getElementById(
       "noteInput"
     );
 
+
   const person =
     document.getElementById(
       "personSelect"
     ).value;
+
 
   const text =
     input.value.trim();
@@ -514,54 +609,154 @@ function addNote() {
   }
 
 
-  const notes =
-    getNotes();
+  const button =
+    document.querySelector(
+      ".add-button"
+    );
 
 
-  notes.push({
+  button.disabled = true;
 
-    id:
-      Date.now().toString(),
-
-    person:
-      person,
-
-    text:
-      text,
-
-    created:
-      new Date().toISOString()
-
-  });
+  button.textContent =
+    "Posting...";
 
 
-  saveNotes(notes);
+  try {
 
-  input.value = "";
+    const response =
+      await fetch(
+        "/api/board",
+        {
+          method: "POST",
 
-  renderNotes();
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
 
-}
-
-
-function deleteNote(id) {
-
-  const notes =
-    getNotes()
-      .filter(
-        note => note.id !== id
+          body:
+            JSON.stringify({
+              person,
+              text
+            })
+        }
       );
 
-  saveNotes(notes);
 
-  renderNotes();
+    const data =
+      await response.json();
+
+
+    if (
+      !response.ok ||
+      !data.success
+    ) {
+
+      throw new Error(
+        data.error ||
+        "Could not post note."
+      );
+
+    }
+
+
+    input.value = "";
+
+
+    await loadNotes();
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      "Couldn't post this note. Please try again."
+    );
+
+  } finally {
+
+    button.disabled = false;
+
+    button.textContent =
+      "Post";
+
+  }
 
 }
 
 
-renderNotes();
+/* =========================
+   DELETE SHARED NOTE
+========================= */
+
+async function deleteNote(id) {
+
+  const confirmed =
+    confirm(
+      "Delete this note?"
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/board?id=" +
+        encodeURIComponent(id),
+        {
+          method: "DELETE"
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (
+      !response.ok ||
+      !data.success
+    ) {
+
+      throw new Error(
+        data.error ||
+        "Could not delete note."
+      );
+
+    }
+
+
+    await loadNotes();
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      "Couldn't delete this note. Please try again."
+    );
+
+  }
+
+}
+
+
+/* =========================
+   START
+========================= */
+
+loadNotes();
 
 </script>
+
+
 
 </body>
 </html>
