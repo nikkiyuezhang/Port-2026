@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#17324d">
+
+<title>Port 2026 · Trip Board</title>
+
+<style>
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  background: #f3f5f7;
+  color: #18222c;
+}
+
+.app {
+  max-width: 520px;
+  margin: auto;
+  min-height: 100vh;
+  background: white;
+}
+
+.header {
+  background: #17324d;
+  color: white;
+  padding: 28px 22px 27px;
+}
+
+.back {
+  display: inline-block;
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  margin-bottom: 22px;
+  opacity: .85;
+}
+
+.label {
+  font-size: 11px;
+  letter-spacing: 1.6px;
+  opacity: .7;
+}
+
+h1 {
+  margin: 6px 0;
+  font-size: 34px;
+}
+
+.subtitle {
+  font-size: 14px;
+  opacity: .8;
+}
+
+.content {
+  padding: 22px;
+}
+
+.intro {
+  font-size: 13px;
+  color: #71808a;
+  line-height: 1.55;
+  margin-bottom: 20px;
+}
+
+/* ADD CARD */
+
+.add-card {
+  background: #eef6fa;
+  border-radius: 18px;
+  padding: 17px;
+  margin-bottom: 25px;
+}
+
+.add-title {
+  font-size: 14px;
+  font-weight: 750;
+  margin-bottom: 11px;
+}
+
+textarea {
+  width: 100%;
+  min-height: 85px;
+  resize: vertical;
+  border: 1px solid #dce4e8;
+  border-radius: 12px;
+  padding: 12px;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  background: white;
+}
+
+textarea:focus {
+  border-color: #17324d;
+}
+
+.add-bottom {
+  display: flex;
+  gap: 9px;
+  margin-top: 10px;
+}
+
+select {
+  flex: 1;
+  border: 1px solid #dce4e8;
+  background: white;
+  border-radius: 11px;
+  padding: 10px;
+  font-family: inherit;
+  font-size: 12px;
+}
+
+.add-button {
+  border: none;
+  background: #17324d;
+  color: white;
+  border-radius: 11px;
+  padding: 10px 17px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* BOARD */
+
+.section-title {
+  font-size: 11px;
+  font-weight: 750;
+  color: #75838b;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.board {
+  display: grid;
+  gap: 12px;
+}
+
+.note {
+  border: 1px solid #e5eaed;
+  border-radius: 17px;
+  padding: 15px;
+  background: white;
+}
+
+.note-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.person {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.avatar {
+  width: 30px;
+  height: 30px;
+  background: #17324d;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.person-name {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.delete {
+  border: none;
+  background: transparent;
+  color: #a2aaae;
+  cursor: pointer;
+  font-size: 17px;
+}
+
+.note-text {
+  margin-top: 12px;
+  font-size: 14px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.note-time {
+  margin-top: 10px;
+  font-size: 10px;
+  color: #a1aaaf;
+}
+
+/* EMPTY */
+
+.empty {
+  text-align: center;
+  padding: 35px 15px;
+  color: #89959b;
+}
+
+.empty-icon {
+  font-size: 32px;
+}
+
+.empty-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 9px;
+}
+
+.empty-text {
+  font-size: 11px;
+  margin-top: 5px;
+}
+
+/* INFO */
+
+.local-note {
+  background: #fff7e6;
+  border-radius: 14px;
+  padding: 13px;
+  margin-top: 22px;
+  color: #776b4e;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.footer {
+  text-align: center;
+  color: #a0a5a9;
+  font-size: 11px;
+  padding: 22px 0 30px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<header class="header">
+
+<a class="back" href="index.html">
+← Port 2026
+</a>
+
+<div class="label">
+OUR CREW
+</div>
+
+<h1>Trip Board</h1>
+
+<div class="subtitle">
+Ideas, notes & things to remember
+</div>
+
+</header>
+
+
+<main class="content">
+
+<div class="intro">
+Drop an idea, restaurant suggestion, reminder or anything the crew should know.
+</div>
+
+
+<div class="add-card">
+
+<div class="add-title">
+💬 Add something
+</div>
+
+<textarea
+id="noteInput"
+placeholder="Dinner idea, place to visit, something to bring..."></textarea>
+
+<div class="add-bottom">
+
+<select id="personSelect">
+  <option value="Nikki">Nikki</option>
+  <option value="Danny">Danny</option>
+  <option value="Kelly">Kelly</option>
+  <option value="Wade">Wade</option>
+  <option value="Phila">Phila</option>
+  <option value="Eliana">Eliana</option>
+  <option value="Jayan">Jayan</option>
+  <option value="Kaia">Kaia</option>
+</select>
+
+<button
+class="add-button"
+onclick="addNote()">
+Post
+</button>
+
+</div>
+
+</div>
+
+
+<div class="section-title">
+BOARD
+</div>
+
+<div class="board" id="board"></div>
+
+
+<div class="local-note">
+🔒 <strong>Prototype mode</strong><br>
+For now, posts are saved only on this device. Once the board design is confirmed, we’ll connect it to the shared trip database so everyone sees the same board.
+</div>
+
+
+<div class="footer">
+Port 2026 · Trip Board
+</div>
+
+</main>
+
+</div>
+
+
+<script>
+
+const STORAGE_KEY =
+  "port2026_trip_board";
+
+
+function getNotes() {
+
+  try {
+
+    return JSON.parse(
+      localStorage.getItem(STORAGE_KEY)
+    ) || [];
+
+  } catch {
+
+    return [];
+
+  }
+
+}
+
+
+function saveNotes(notes) {
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(notes)
+  );
+
+}
+
+
+function initials(name) {
+
+  return name
+    .split(" ")
+    .map(word => word[0])
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
+
+}
+
+
+function formatTime(timestamp) {
+
+  const date =
+    new Date(timestamp);
+
+  return date.toLocaleString(
+    "en-AU",
+    {
+      day: "numeric",
+      month: "short",
+      hour: "numeric",
+      minute: "2-digit"
+    }
+  );
+
+}
+
+
+function escapeHTML(text) {
+
+  const div =
+    document.createElement("div");
+
+  div.textContent = text;
+
+  return div.innerHTML;
+
+}
+
+
+function renderNotes() {
+
+  const notes =
+    getNotes();
+
+  const board =
+    document.getElementById("board");
+
+
+  if (notes.length === 0) {
+
+    board.innerHTML = `
+      <div class="empty">
+
+        <div class="empty-icon">
+          💭
+        </div>
+
+        <div class="empty-title">
+          Nothing here yet
+        </div>
+
+        <div class="empty-text">
+          Be the first to add something to the trip.
+        </div>
+
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  board.innerHTML =
+    notes
+      .slice()
+      .reverse()
+      .map(note => `
+
+        <div class="note">
+
+          <div class="note-top">
+
+            <div class="person">
+
+              <div class="avatar">
+                ${initials(note.person)}
+              </div>
+
+              <div class="person-name">
+                ${escapeHTML(note.person)}
+              </div>
+
+            </div>
+
+            <button
+              class="delete"
+              onclick="deleteNote('${note.id}')"
+              aria-label="Delete note">
+              ×
+            </button>
+
+          </div>
+
+          <div class="note-text">
+            ${escapeHTML(note.text)}
+          </div>
+
+          <div class="note-time">
+            ${formatTime(note.created)}
+          </div>
+
+        </div>
+
+      `)
+      .join("");
+
+}
+
+
+function addNote() {
+
+  const input =
+    document.getElementById(
+      "noteInput"
+    );
+
+  const person =
+    document.getElementById(
+      "personSelect"
+    ).value;
+
+  const text =
+    input.value.trim();
+
+
+  if (!text) {
+
+    alert(
+      "Write something first."
+    );
+
+    return;
+
+  }
+
+
+  const notes =
+    getNotes();
+
+
+  notes.push({
+
+    id:
+      Date.now().toString(),
+
+    person:
+      person,
+
+    text:
+      text,
+
+    created:
+      new Date().toISOString()
+
+  });
+
+
+  saveNotes(notes);
+
+  input.value = "";
+
+  renderNotes();
+
+}
+
+
+function deleteNote(id) {
+
+  const notes =
+    getNotes()
+      .filter(
+        note => note.id !== id
+      );
+
+  saveNotes(notes);
+
+  renderNotes();
+
+}
+
+
+renderNotes();
+
+</script>
+
+</body>
+</html>
