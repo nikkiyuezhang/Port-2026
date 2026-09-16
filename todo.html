@@ -454,7 +454,6 @@ Port 2026 · To-do
 
 </div>
 
-
 <script>
 
 /* =========================
@@ -462,196 +461,121 @@ Port 2026 · To-do
    Cloudflare D1 version
 ========================= */
 
+function initials(name) {
+
+  if (name === "Everyone") {
+    return "ALL";
+  }
+
+  return name
+    .split(" ")
+    .map(word => word[0])
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
+}
+
 
 function escapeHTML(text) {
-  const div = document.createElement("div");
+
+  const div =
+    document.createElement("div");
+
   div.textContent = text;
+
   return div.innerHTML;
 }
 
 
 /* =========================
-   LOAD SHARED TASKS
+   LOAD TASKS FROM D1
 ========================= */
 
 async function loadTasks() {
 
   try {
 
-    const response = await fetch(
-      "/api/todo",
-      {
-        cache: "no-store"
-      }
-    );
+    const response =
+      await fetch(
+        "/api/todo",
+        {
+          cache: "no-store"
+        }
+      );
 
-    const data = await response.json();
 
-    if (!response.ok || !data.success) {
+    const data =
+      await response.json();
+
+
+    if (
+      !response.ok ||
+      !data.success
+    ) {
+
       throw new Error(
-        data.error || "Could not load tasks."
+        data.error ||
+        "Could not load tasks."
       );
     }
 
-    renderTasks(data.tasks || []);
+
+    renderTasks(
+      data.tasks || []
+    );
+
 
   } catch (error) {
 
     console.error(error);
 
-    const list =
-      document.getElementById("todoList");
 
-    if (list) {
-      list.innerHTML = `
-        <div class="empty">
-          Couldn't load the shared to-do list.
-        </div>
-      `;
-    }
-  }
-}
+    document.getElementById(
+      "openTasks"
+    ).innerHTML = `
 
-
-/* =========================
-   DISPLAY TASKS
-========================= */
-
-function renderTasks(tasks) {
-
-  const list =
-    document.getElementById("todoList");
-
-  if (!list) return;
-
-
-  if (tasks.length === 0) {
-
-    list.innerHTML = `
       <div class="empty">
-        Nothing to do yet. Add the first trip task.
+        ⚠️ Couldn't load the shared to-do list.
       </div>
+
     `;
 
-    updateProgress(tasks);
 
-    return;
-  }
-
-
-  list.innerHTML =
-    tasks.map(task => {
-
-      const completed =
-        Number(task.completed) === 1;
-
-      return `
-        <div class="todo-item ${completed ? "completed" : ""}">
-
-          <button
-            class="check-button"
-            onclick="toggleTask(${Number(task.id)}, ${completed ? "false" : "true"})"
-            aria-label="Toggle task">
-            ${completed ? "✓" : ""}
-          </button>
-
-          <div class="todo-content">
-
-            <div class="todo-text">
-              ${escapeHTML(task.text)}
-            </div>
-
-            <div class="todo-assignee">
-              ${escapeHTML(task.assignee)}
-            </div>
-
-          </div>
-
-          <button
-            class="delete-button"
-            onclick="deleteTask(${Number(task.id)})"
-            aria-label="Delete task">
-            ×
-          </button>
-
-        </div>
-      `;
-
-    }).join("");
-
-
-  updateProgress(tasks);
-}
-
-
-/* =========================
-   PROGRESS
-========================= */
-
-function updateProgress(tasks) {
-
-  const total = tasks.length;
-
-  const completed =
-    tasks.filter(
-      task => Number(task.completed) === 1
-    ).length;
-
-
-  const progressText =
-    document.getElementById("progressText");
-
-  const progressFill =
-    document.getElementById("progressFill");
-
-
-  if (progressText) {
-
-    progressText.textContent =
-      total === 0
-        ? "0 of 0 completed"
-        : `${completed} of ${total} completed`;
-
-  }
-
-
-  if (progressFill) {
-
-    const percentage =
-      total === 0
-        ? 0
-        : (completed / total) * 100;
-
-    progressFill.style.width =
-      `${percentage}%`;
+    document.getElementById(
+      "completedTasks"
+    ).innerHTML = "";
 
   }
 }
 
 
 /* =========================
-   ADD SHARED TASK
+   ADD TASK
 ========================= */
 
 async function addTask() {
 
   const input =
-    document.getElementById("taskInput");
-
-  const assigneeSelect =
-    document.getElementById("assigneeSelect");
+    document.getElementById(
+      "taskInput"
+    );
 
 
   const text =
     input.value.trim();
 
+
   const assignee =
-    assigneeSelect.value;
+    document.getElementById(
+      "assigneeSelect"
+    ).value;
 
 
   if (!text) {
 
-    alert("Write a task first.");
+    alert(
+      "Add a task first."
+    );
 
     return;
   }
@@ -659,28 +583,34 @@ async function addTask() {
 
   try {
 
-    const response = await fetch(
-      "/api/todo",
-      {
-        method: "POST",
+    const response =
+      await fetch(
+        "/api/todo",
+        {
+          method: "POST",
 
-        headers: {
-          "Content-Type": "application/json"
-        },
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
 
-        body: JSON.stringify({
-          text,
-          assignee
-        })
-      }
-    );
+          body:
+            JSON.stringify({
+              text,
+              assignee
+            })
+        }
+      );
 
 
     const data =
       await response.json();
 
 
-    if (!response.ok || !data.success) {
+    if (
+      !response.ok ||
+      !data.success
+    ) {
 
       throw new Error(
         data.error ||
@@ -690,6 +620,7 @@ async function addTask() {
 
 
     input.value = "";
+
 
     await loadTasks();
 
@@ -706,35 +637,44 @@ async function addTask() {
 
 
 /* =========================
-   COMPLETE / UNCOMPLETE
+   TOGGLE COMPLETE
 ========================= */
 
-async function toggleTask(id, completed) {
+async function toggleTask(
+  id,
+  completed
+) {
 
   try {
 
-    const response = await fetch(
-      "/api/todo",
-      {
-        method: "PATCH",
+    const response =
+      await fetch(
+        "/api/todo",
+        {
+          method: "PATCH",
 
-        headers: {
-          "Content-Type": "application/json"
-        },
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
 
-        body: JSON.stringify({
-          id,
-          completed
-        })
-      }
-    );
+          body:
+            JSON.stringify({
+              id,
+              completed
+            })
+        }
+      );
 
 
     const data =
       await response.json();
 
 
-    if (!response.ok || !data.success) {
+    if (
+      !response.ok ||
+      !data.success
+    ) {
 
       throw new Error(
         data.error ||
@@ -758,34 +698,42 @@ async function toggleTask(id, completed) {
 
 
 /* =========================
-   DELETE SHARED TASK
+   DELETE TASK
 ========================= */
 
 async function deleteTask(id) {
 
   const confirmed =
-    confirm("Delete this task?");
+    confirm(
+      "Delete this task?"
+    );
 
 
-  if (!confirmed) return;
+  if (!confirmed) {
+    return;
+  }
 
 
   try {
 
-    const response = await fetch(
-      "/api/todo?id=" +
-      encodeURIComponent(id),
-      {
-        method: "DELETE"
-      }
-    );
+    const response =
+      await fetch(
+        "/api/todo?id=" +
+        encodeURIComponent(id),
+        {
+          method: "DELETE"
+        }
+      );
 
 
     const data =
       await response.json();
 
 
-    if (!response.ok || !data.success) {
+    if (
+      !response.ok ||
+      !data.success
+    ) {
 
       throw new Error(
         data.error ||
@@ -806,6 +754,190 @@ async function deleteTask(id) {
     );
   }
 }
+
+
+/* =========================
+   TASK HTML
+========================= */
+
+function taskHTML(task) {
+
+  const completed =
+    Number(task.completed) === 1;
+
+
+  return `
+
+  <div class="task ${completed ? "completed" : ""}">
+
+    <div
+      class="check"
+      onclick="toggleTask(
+        ${Number(task.id)},
+        ${completed ? "false" : "true"}
+      )">
+
+      ${completed ? "✓" : ""}
+
+    </div>
+
+
+    <div>
+
+      <div class="task-name">
+        ${escapeHTML(task.text)}
+      </div>
+
+
+      <div class="assignee">
+
+        <div class="avatar">
+          ${initials(task.assignee)}
+        </div>
+
+        <div class="assignee-name">
+          ${escapeHTML(task.assignee)}
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <button
+      class="delete"
+      onclick="deleteTask(${Number(task.id)})"
+      aria-label="Delete task">
+      ×
+    </button>
+
+  </div>
+
+  `;
+}
+
+
+/* =========================
+   RENDER
+========================= */
+
+function renderTasks(tasks) {
+
+  const open =
+    tasks.filter(
+      task =>
+        Number(task.completed) !== 1
+    );
+
+
+  const completed =
+    tasks.filter(
+      task =>
+        Number(task.completed) === 1
+    );
+
+
+  const openContainer =
+    document.getElementById(
+      "openTasks"
+    );
+
+
+  const completedContainer =
+    document.getElementById(
+      "completedTasks"
+    );
+
+
+  if (open.length === 0) {
+
+    openContainer.innerHTML = `
+
+      <div class="empty">
+        🎉 Nothing left to do.
+      </div>
+
+    `;
+
+  } else {
+
+    openContainer.innerHTML =
+      open
+        .map(taskHTML)
+        .join("");
+
+  }
+
+
+  if (completed.length === 0) {
+
+    completedContainer.innerHTML = `
+
+      <div class="empty">
+        Completed tasks will appear here.
+      </div>
+
+    `;
+
+  } else {
+
+    completedContainer.innerHTML =
+      completed
+        .map(taskHTML)
+        .join("");
+
+  }
+
+
+  /* PROGRESS */
+
+  const total =
+    tasks.length;
+
+
+  const done =
+    completed.length;
+
+
+  document.getElementById(
+    "progressNumber"
+  ).textContent =
+    `${done} / ${total} done`;
+
+
+  const percent =
+    total === 0
+      ? 0
+      : (done / total) * 100;
+
+
+  document.getElementById(
+    "progressFill"
+  ).style.width =
+    percent + "%";
+}
+
+
+/* =========================
+   ENTER KEY
+========================= */
+
+document.getElementById(
+  "taskInput"
+).addEventListener(
+  "keydown",
+  function(event) {
+
+    if (event.key === "Enter") {
+
+      event.preventDefault();
+
+      addTask();
+
+    }
+
+  }
+);
 
 
 /* =========================
