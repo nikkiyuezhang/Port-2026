@@ -1,22 +1,52 @@
-// GET /api/board
-// Read all shared board notes
+/* =========================
+   TRIP CODE CHECK
+========================= */
+
+function checkTripCode(context) {
+
+  const suppliedCode =
+    context.request.headers.get(
+      "X-Trip-Code"
+    );
+
+  const correctCode =
+    context.env.TRIP_CODE;
+
+
+  return (
+    correctCode &&
+    suppliedCode === correctCode
+  );
+}
+
+
+/* =========================
+   GET /api/board
+   Anyone can read
+========================= */
 
 export async function onRequestGet(context) {
+
   try {
-    const result = await context.env.DB
-      .prepare(`
-        SELECT id, person, text, created_at
-        FROM board_notes
-        ORDER BY id DESC
-      `)
-      .all();
+
+    const result =
+      await context.env.DB
+        .prepare(`
+          SELECT id, person, text, created_at
+          FROM board_notes
+          ORDER BY id DESC
+        `)
+        .all();
+
 
     return Response.json({
       success: true,
       notes: result.results
     });
 
+
   } catch (error) {
+
     return Response.json(
       {
         success: false,
@@ -28,25 +58,50 @@ export async function onRequestGet(context) {
 }
 
 
-// POST /api/board
-// Add a new shared board note
+/* =========================
+   POST /api/board
+   Trip Code required
+========================= */
 
 export async function onRequestPost(context) {
+
   try {
-    const body = await context.request.json();
 
-    const person =
-      String(body.person || "").trim();
+    if (!checkTripCode(context)) {
 
-    const text =
-      String(body.text || "").trim();
-
-
-    if (!person || !text) {
       return Response.json(
         {
           success: false,
-          error: "Person and text are required."
+          error: "Invalid Trip Code."
+        },
+        { status: 401 }
+      );
+    }
+
+
+    const body =
+      await context.request.json();
+
+
+    const person =
+      String(
+        body.person || ""
+      ).trim();
+
+
+    const text =
+      String(
+        body.text || ""
+      ).trim();
+
+
+    if (!person || !text) {
+
+      return Response.json(
+        {
+          success: false,
+          error:
+            "Person and text are required."
         },
         { status: 400 }
       );
@@ -54,10 +109,12 @@ export async function onRequestPost(context) {
 
 
     if (text.length > 1000) {
+
       return Response.json(
         {
           success: false,
-          error: "Note is too long."
+          error:
+            "Note is too long."
         },
         { status: 400 }
       );
@@ -76,7 +133,10 @@ export async function onRequestPost(context) {
     ];
 
 
-    if (!allowedPeople.includes(person)) {
+    if (
+      !allowedPeople.includes(person)
+    ) {
+
       return Response.json(
         {
           success: false,
@@ -87,14 +147,18 @@ export async function onRequestPost(context) {
     }
 
 
-    const result = await context.env.DB
-      .prepare(`
-        INSERT INTO board_notes
-        (person, text)
-        VALUES (?, ?)
-      `)
-      .bind(person, text)
-      .run();
+    const result =
+      await context.env.DB
+        .prepare(`
+          INSERT INTO board_notes
+          (person, text)
+          VALUES (?, ?)
+        `)
+        .bind(
+          person,
+          text
+        )
+        .run();
 
 
     return Response.json({
@@ -102,7 +166,9 @@ export async function onRequestPost(context) {
       id: result.meta.last_row_id
     });
 
+
   } catch (error) {
+
     return Response.json(
       {
         success: false,
@@ -114,23 +180,49 @@ export async function onRequestPost(context) {
 }
 
 
-// DELETE /api/board?id=123
-// Delete a shared board note
+/* =========================
+   DELETE /api/board?id=123
+   Trip Code required
+========================= */
 
 export async function onRequestDelete(context) {
+
   try {
-    const url =
-      new URL(context.request.url);
 
-    const id =
-      Number(url.searchParams.get("id"));
+    if (!checkTripCode(context)) {
 
-
-    if (!Number.isInteger(id) || id <= 0) {
       return Response.json(
         {
           success: false,
-          error: "Valid note ID is required."
+          error: "Invalid Trip Code."
+        },
+        { status: 401 }
+      );
+    }
+
+
+    const url =
+      new URL(
+        context.request.url
+      );
+
+
+    const id =
+      Number(
+        url.searchParams.get("id")
+      );
+
+
+    if (
+      !Number.isInteger(id) ||
+      id <= 0
+    ) {
+
+      return Response.json(
+        {
+          success: false,
+          error:
+            "Valid note ID is required."
         },
         { status: 400 }
       );
@@ -150,7 +242,9 @@ export async function onRequestDelete(context) {
       success: true
     });
 
+
   } catch (error) {
+
     return Response.json(
       {
         success: false,
