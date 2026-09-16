@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#17324d">
+
+<title>Port 2026 · To-do</title>
+
+<style>
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  background: #f3f5f7;
+  color: #18222c;
+}
+
+.app {
+  max-width: 520px;
+  margin: auto;
+  min-height: 100vh;
+  background: white;
+}
+
+/* HEADER */
+
+.header {
+  background: #17324d;
+  color: white;
+  padding: 28px 22px 27px;
+}
+
+.back {
+  display: inline-block;
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  margin-bottom: 22px;
+  opacity: .85;
+}
+
+.label {
+  font-size: 11px;
+  letter-spacing: 1.6px;
+  opacity: .7;
+}
+
+h1 {
+  margin: 6px 0;
+  font-size: 34px;
+}
+
+.subtitle {
+  font-size: 14px;
+  opacity: .8;
+}
+
+/* CONTENT */
+
+.content {
+  padding: 22px;
+}
+
+/* PROGRESS */
+
+.progress-card {
+  background: #eef6fa;
+  border-radius: 18px;
+  padding: 17px;
+  margin-bottom: 22px;
+}
+
+.progress-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progress-title {
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.progress-number {
+  font-size: 12px;
+  color: #617682;
+  font-weight: 700;
+}
+
+.progress-bar {
+  height: 8px;
+  background: #dce8ed;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 12px;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: #17324d;
+  border-radius: 10px;
+  transition: width .3s ease;
+}
+
+/* ADD */
+
+.add-card {
+  border: 1px solid #e4e9ec;
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 25px;
+}
+
+.add-title {
+  font-size: 14px;
+  font-weight: 750;
+  margin-bottom: 11px;
+}
+
+.task-input {
+  width: 100%;
+  border: 1px solid #dce4e8;
+  border-radius: 11px;
+  padding: 12px;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+}
+
+.task-input:focus {
+  border-color: #17324d;
+}
+
+.add-bottom {
+  display: flex;
+  gap: 9px;
+  margin-top: 10px;
+}
+
+select {
+  flex: 1;
+  border: 1px solid #dce4e8;
+  background: white;
+  border-radius: 11px;
+  padding: 10px;
+  font-family: inherit;
+  font-size: 12px;
+}
+
+.add-button {
+  border: none;
+  background: #17324d;
+  color: white;
+  border-radius: 11px;
+  padding: 10px 17px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* LIST */
+
+.section-title {
+  font-size: 11px;
+  font-weight: 750;
+  color: #75838b;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.task-list {
+  display: grid;
+  gap: 10px;
+}
+
+.task {
+  border: 1px solid #e5eaed;
+  border-radius: 16px;
+  padding: 14px;
+  display: grid;
+  grid-template-columns: 30px 1fr 25px;
+  gap: 10px;
+  align-items: start;
+}
+
+.check {
+  width: 25px;
+  height: 25px;
+  border: 2px solid #b8c4ca;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  background: white;
+}
+
+.task.completed .check {
+  background: #17324d;
+  border-color: #17324d;
+  color: white;
+}
+
+.task-name {
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.task.completed .task-name {
+  text-decoration: line-through;
+  color: #98a1a6;
+}
+
+.assignee {
+  margin-top: 7px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.avatar {
+  width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  background: #edf4f7;
+  color: #17324d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.assignee-name {
+  font-size: 10px;
+  color: #849098;
+}
+
+.delete {
+  border: none;
+  background: transparent;
+  color: #a5adb1;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+/* COMPLETED TITLE */
+
+.completed-heading {
+  margin-top: 26px;
+}
+
+/* EMPTY */
+
+.empty {
+  padding: 25px;
+  text-align: center;
+  color: #909ba0;
+  font-size: 12px;
+}
+
+/* LOCAL INFO */
+
+.local-note {
+  background: #fff7e6;
+  border-radius: 14px;
+  padding: 13px;
+  margin-top: 24px;
+  color: #776b4e;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.footer {
+  text-align: center;
+  color: #a0a5a9;
+  font-size: 11px;
+  padding: 22px 0 30px;
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div class="app">
+
+<header class="header">
+
+<a class="back" href="index.html">
+← Port 2026
+</a>
+
+<div class="label">
+GET READY
+</div>
+
+<h1>To-do</h1>
+
+<div class="subtitle">
+Things to organise before we go
+</div>
+
+</header>
+
+
+<main class="content">
+
+
+<!-- PROGRESS -->
+
+<div class="progress-card">
+
+<div class="progress-top">
+
+<div class="progress-title">
+Trip preparation
+</div>
+
+<div class="progress-number" id="progressNumber">
+0 / 0 done
+</div>
+
+</div>
+
+<div class="progress-bar">
+<div
+  class="progress-fill"
+  id="progressFill">
+</div>
+</div>
+
+</div>
+
+
+<!-- ADD TASK -->
+
+<div class="add-card">
+
+<div class="add-title">
+＋ Add a task
+</div>
+
+<input
+  class="task-input"
+  id="taskInput"
+  type="text"
+  placeholder="Book brunch, pack beach towels...">
+
+<div class="add-bottom">
+
+<select id="assigneeSelect">
+
+<option value="Everyone">
+Everyone
+</option>
+
+<option value="Nikki">
+Nikki
+</option>
+
+<option value="Danny">
+Danny
+</option>
+
+<option value="Kelly">
+Kelly
+</option>
+
+<option value="Wade">
+Wade
+</option>
+
+<option value="Phila">
+Phila
+</option>
+
+<option value="Eliana">
+Eliana
+</option>
+
+<option value="Jayan">
+Jayan
+</option>
+
+<option value="Kaia">
+Kaia
+</option>
+
+</select>
+
+
+<button
+  class="add-button"
+  onclick="addTask()">
+Add
+</button>
+
+</div>
+
+</div>
+
+
+<!-- OPEN TASKS -->
+
+<div class="section-title">
+TO DO
+</div>
+
+<div
+  class="task-list"
+  id="openTasks">
+</div>
+
+
+<!-- COMPLETED -->
+
+<div
+  class="section-title completed-heading"
+  id="completedHeading">
+COMPLETED
+</div>
+
+<div
+  class="task-list"
+  id="completedTasks">
+</div>
+
+
+<div class="local-note">
+
+🔒 <strong>Prototype mode</strong><br>
+
+Tasks are currently saved on this device only.
+Next, we’ll connect this list to the shared Port 2026 database so everyone sees the same tasks and updates.
+
+</div>
+
+
+<div class="footer">
+Port 2026 · To-do
+</div>
+
+
+</main>
+
+</div>
+
+
+<script>
+
+const TODO_STORAGE_KEY =
+  "port2026_todo";
+
+
+function getTasks() {
+
+  try {
+
+    return JSON.parse(
+      localStorage.getItem(
+        TODO_STORAGE_KEY
+      )
+    ) || [];
+
+  }
+
+  catch {
+
+    return [];
+
+  }
+
+}
+
+
+function saveTasks(tasks) {
+
+  localStorage.setItem(
+    TODO_STORAGE_KEY,
+    JSON.stringify(tasks)
+  );
+
+}
+
+
+function initials(name) {
+
+  if (name === "Everyone") {
+    return "ALL";
+  }
+
+  return name
+    .split(" ")
+    .map(word => word[0])
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
+
+}
+
+
+function escapeHTML(text) {
+
+  const div =
+    document.createElement("div");
+
+  div.textContent = text;
+
+  return div.innerHTML;
+
+}
+
+
+function addTask() {
+
+  const input =
+    document.getElementById(
+      "taskInput"
+    );
+
+  const text =
+    input.value.trim();
+
+  const assignee =
+    document.getElementById(
+      "assigneeSelect"
+    ).value;
+
+
+  if (!text) {
+
+    alert(
+      "Add a task first."
+    );
+
+    return;
+
+  }
+
+
+  const tasks =
+    getTasks();
+
+
+  tasks.push({
+
+    id:
+      Date.now().toString(),
+
+    text:
+      text,
+
+    assignee:
+      assignee,
+
+    completed:
+      false,
+
+    created:
+      new Date().toISOString()
+
+  });
+
+
+  saveTasks(tasks);
+
+  input.value = "";
+
+  renderTasks();
+
+}
+
+
+function toggleTask(id) {
+
+  const tasks =
+    getTasks();
+
+
+  const task =
+    tasks.find(
+      task => task.id === id
+    );
+
+
+  if (task) {
+
+    task.completed =
+      !task.completed;
+
+  }
+
+
+  saveTasks(tasks);
+
+  renderTasks();
+
+}
+
+
+function deleteTask(id) {
+
+  const tasks =
+    getTasks()
+      .filter(
+        task => task.id !== id
+      );
+
+
+  saveTasks(tasks);
+
+  renderTasks();
+
+}
+
+
+function taskHTML(task) {
+
+  return `
+
+  <div class="task ${task.completed ? "completed" : ""}">
+
+    <div
+      class="check"
+      onclick="toggleTask('${task.id}')">
+
+      ${task.completed ? "✓" : ""}
+
+    </div>
+
+
+    <div>
+
+      <div class="task-name">
+        ${escapeHTML(task.text)}
+      </div>
+
+
+      <div class="assignee">
+
+        <div class="avatar">
+          ${initials(task.assignee)}
+        </div>
+
+        <div class="assignee-name">
+          ${escapeHTML(task.assignee)}
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <button
+      class="delete"
+      onclick="deleteTask('${task.id}')"
+      aria-label="Delete task">
+      ×
+    </button>
+
+  </div>
+
+  `;
+
+}
+
+
+function renderTasks() {
+
+  const tasks =
+    getTasks();
+
+
+  const open =
+    tasks.filter(
+      task => !task.completed
+    );
+
+
+  const completed =
+    tasks.filter(
+      task => task.completed
+    );
+
+
+  const openContainer =
+    document.getElementById(
+      "openTasks"
+    );
+
+
+  const completedContainer =
+    document.getElementById(
+      "completedTasks"
+    );
+
+
+  if (open.length === 0) {
+
+    openContainer.innerHTML = `
+
+      <div class="empty">
+        🎉 Nothing left to do.
+      </div>
+
+    `;
+
+  } else {
+
+    openContainer.innerHTML =
+      open
+        .map(taskHTML)
+        .join("");
+
+  }
+
+
+  if (completed.length === 0) {
+
+    completedContainer.innerHTML = `
+
+      <div class="empty">
+        Completed tasks will appear here.
+      </div>
+
+    `;
+
+  } else {
+
+    completedContainer.innerHTML =
+      completed
+        .slice()
+        .reverse()
+        .map(taskHTML)
+        .join("");
+
+  }
+
+
+  /* PROGRESS */
+
+  const total =
+    tasks.length;
+
+  const done =
+    completed.length;
+
+
+  document.getElementById(
+    "progressNumber"
+  ).textContent =
+    `${done} / ${total} done`;
+
+
+  const percent =
+    total === 0
+      ? 0
+      : (done / total) * 100;
+
+
+  document.getElementById(
+    "progressFill"
+  ).style.width =
+    percent + "%";
+
+}
+
+
+renderTasks();
+
+
+/* ENTER KEY */
+
+document.getElementById(
+  "taskInput"
+).addEventListener(
+  "keydown",
+  function(event) {
+
+    if (event.key === "Enter") {
+
+      event.preventDefault();
+
+      addTask();
+
+    }
+
+  }
+);
+
+</script>
+
+</body>
+</html>
