@@ -449,7 +449,75 @@ Port 2026 · To-do
 
 /* =========================
    PORT 2026 SHARED TODO
-   Cloudflare D1 version
+   D1 + Trip Code
+========================= */
+
+const TRIP_CODE_KEY =
+  "port2026_trip_code";
+
+
+function getTripCode() {
+
+  return sessionStorage.getItem(
+    TRIP_CODE_KEY
+  ) || "";
+
+}
+
+
+function saveTripCode(code) {
+
+  sessionStorage.setItem(
+    TRIP_CODE_KEY,
+    code
+  );
+
+}
+
+
+function clearTripCode() {
+
+  sessionStorage.removeItem(
+    TRIP_CODE_KEY
+  );
+
+}
+
+
+function askForTripCode() {
+
+  const code =
+    prompt(
+      "Enter the Port 2026 Trip Code:"
+    );
+
+
+  if (code === null) {
+    return null;
+  }
+
+
+  const cleanCode =
+    code.trim();
+
+
+  if (!cleanCode) {
+
+    alert(
+      "Trip Code is required."
+    );
+
+    return null;
+
+  }
+
+
+  return cleanCode;
+}
+
+
+/* =========================
+   HELPERS
 ========================= */
 
 function initials(name) {
@@ -464,6 +532,7 @@ function initials(name) {
     .join("")
     .substring(0, 2)
     .toUpperCase();
+
 }
 
 
@@ -475,11 +544,102 @@ function escapeHTML(text) {
   div.textContent = text;
 
   return div.innerHTML;
+
 }
 
 
 /* =========================
-   LOAD TASKS FROM D1
+   AUTHENTICATED WRITE
+========================= */
+
+async function todoWriteRequest(
+  url,
+  options
+) {
+
+  let code =
+    getTripCode();
+
+
+  if (!code) {
+
+    code =
+      askForTripCode();
+
+
+    if (!code) {
+      return null;
+    }
+
+  }
+
+
+  options.headers = {
+    ...(options.headers || {}),
+    "X-Trip-Code": code
+  };
+
+
+  let response =
+    await fetch(
+      url,
+      options
+    );
+
+
+  /*
+    Wrong code:
+    clear it and ask once more.
+  */
+
+  if (response.status === 401) {
+
+    clearTripCode();
+
+
+    alert(
+      "That Trip Code wasn't correct. Please try again."
+    );
+
+
+    code =
+      askForTripCode();
+
+
+    if (!code) {
+      return null;
+    }
+
+
+    options.headers = {
+      ...(options.headers || {}),
+      "X-Trip-Code": code
+    };
+
+
+    response =
+      await fetch(
+        url,
+        options
+      );
+
+  }
+
+
+  if (response.ok) {
+
+    saveTripCode(code);
+
+  }
+
+
+  return response;
+}
+
+
+/* =========================
+   LOAD TASKS
+   No Trip Code required
 ========================= */
 
 async function loadTasks() {
@@ -508,6 +668,7 @@ async function loadTasks() {
         data.error ||
         "Could not load tasks."
       );
+
     }
 
 
@@ -537,6 +698,7 @@ async function loadTasks() {
     ).innerHTML = "";
 
   }
+
 }
 
 
@@ -569,13 +731,14 @@ async function addTask() {
     );
 
     return;
+
   }
 
 
   try {
 
     const response =
-      await fetch(
+      await todoWriteRequest(
         "/api/todo",
         {
           method: "POST",
@@ -594,6 +757,11 @@ async function addTask() {
       );
 
 
+    if (!response) {
+      return;
+    }
+
+
     const data =
       await response.json();
 
@@ -607,6 +775,7 @@ async function addTask() {
         data.error ||
         "Could not add task."
       );
+
     }
 
 
@@ -623,12 +792,14 @@ async function addTask() {
     alert(
       "Couldn't add this task. Please try again."
     );
+
   }
+
 }
 
 
 /* =========================
-   TOGGLE COMPLETE
+   COMPLETE / UNCOMPLETE
 ========================= */
 
 async function toggleTask(
@@ -639,7 +810,7 @@ async function toggleTask(
   try {
 
     const response =
-      await fetch(
+      await todoWriteRequest(
         "/api/todo",
         {
           method: "PATCH",
@@ -658,6 +829,11 @@ async function toggleTask(
       );
 
 
+    if (!response) {
+      return;
+    }
+
+
     const data =
       await response.json();
 
@@ -671,6 +847,7 @@ async function toggleTask(
         data.error ||
         "Could not update task."
       );
+
     }
 
 
@@ -684,7 +861,9 @@ async function toggleTask(
     alert(
       "Couldn't update this task. Please try again."
     );
+
   }
+
 }
 
 
@@ -708,13 +887,18 @@ async function deleteTask(id) {
   try {
 
     const response =
-      await fetch(
+      await todoWriteRequest(
         "/api/todo?id=" +
         encodeURIComponent(id),
         {
           method: "DELETE"
         }
       );
+
+
+    if (!response) {
+      return;
+    }
 
 
     const data =
@@ -730,6 +914,7 @@ async function deleteTask(id) {
         data.error ||
         "Could not delete task."
       );
+
     }
 
 
@@ -743,7 +928,9 @@ async function deleteTask(id) {
     alert(
       "Couldn't delete this task. Please try again."
     );
+
   }
+
 }
 
 
@@ -805,6 +992,7 @@ function taskHTML(task) {
   </div>
 
   `;
+
 }
 
 
@@ -880,8 +1068,6 @@ function renderTasks(tasks) {
   }
 
 
-  /* PROGRESS */
-
   const total =
     tasks.length;
 
@@ -906,6 +1092,7 @@ function renderTasks(tasks) {
     "progressFill"
   ).style.width =
     percent + "%";
+
 }
 
 
