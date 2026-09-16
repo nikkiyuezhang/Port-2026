@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#17324d">
+
+<title>Port 2026</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  background: #f3f5f7;
+  color: #18222c;
+}
+
+.app {
+  max-width: 520px;
+  margin: auto;
+  min-height: 100vh;
+  background: #ffffff;
+}
+
+/* HERO */
+
+.hero {
+  padding: 48px 24px 32px;
+  color: white;
+  background:
+    linear-gradient(
+      135deg,
+      #17324d,
+      #28617a
+    );
+}
+
+.trip-label {
+  font-size: 12px;
+  letter-spacing: 2px;
+  opacity: .75;
+}
+
+h1 {
+  margin: 7px 0 2px;
+  font-size: 42px;
+  line-height: 1;
+}
+
+.subtitle {
+  margin-top: 8px;
+  font-size: 15px;
+  opacity: .85;
+}
+
+.dates {
+  margin-top: 24px;
+  font-size: 14px;
+  opacity: .9;
+}
+
+/* ROUTE */
+
+.route {
+  display: flex;
+  align-items: center;
+  margin-top: 22px;
+}
+
+.city {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.route-line {
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,.45);
+  margin: 0 12px;
+  position: relative;
+}
+
+.route-line::after {
+  content: "›";
+  position: absolute;
+  right: -1px;
+  top: -12px;
+  font-size: 22px;
+}
+
+/* COUNTDOWN */
+
+.countdown {
+  margin-top: 28px;
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+}
+
+.count-number {
+  font-size: 34px;
+  font-weight: 700;
+}
+
+.count-text {
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  opacity: .75;
+}
+
+/* CONTENT */
+
+.content {
+  padding: 22px;
+}
+
+.section-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: #7a838c;
+  margin-bottom: 13px;
+}
+
+/* MEMBERS */
+
+.members {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 11px;
+  margin-bottom: 28px;
+}
+
+.member {
+  text-align: center;
+  font-size: 10px;
+  color: #666;
+}
+
+.avatar {
+  width: 43px;
+  height: 43px;
+  border-radius: 50%;
+  background: #e7edf1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-weight: 700;
+  color: #24475d;
+  margin-bottom: 5px;
+}
+
+/* WEATHER */
+
+.weather-card {
+  background: #eef6fa;
+  border-radius: 20px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+.weather-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.weather-location {
+  font-weight: 700;
+}
+
+.weather-icon {
+  font-size: 28px;
+}
+
+.weather-message {
+  margin-top: 7px;
+  font-size: 13px;
+  color: #66747d;
+}
+
+/* MENU */
+
+.menu {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.menu-card {
+  background: #f4f5f6;
+  border-radius: 18px;
+  padding: 20px 16px;
+  min-height: 105px;
+  cursor: pointer;
+}
+
+.menu-icon {
+  font-size: 25px;
+}
+
+.menu-title {
+  margin-top: 13px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.menu-sub {
+  margin-top: 3px;
+  font-size: 11px;
+  color: #777;
+}
+
+/* SHARE */
+
+.share {
+  margin-top: 18px;
+  width: 100%;
+  border: none;
+  border-radius: 16px;
+  padding: 17px;
+  background: #17324d;
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.footer {
+  text-align: center;
+  padding: 25px 0 15px;
+  color: #aaa;
+  font-size: 11px;
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div class="app">
+
+<section class="hero">
+
+  <div class="trip-label">
+    LABOUR DAY GETAWAY
+  </div>
+
+  <h1>Port 2026</h1>
+
+  <div class="subtitle">
+    2026 Labour Day · Port Macquarie
+  </div>
+
+  <div class="dates">
+    3 — 5 October 2026 · 3 Days / 2 Nights
+  </div>
+
+  <div class="route">
+
+    <span class="city">
+      Armidale
+    </span>
+
+    <div class="route-line"></div>
+
+    <span class="city">
+      Port Macquarie
+    </span>
+
+  </div>
+
+  <div class="countdown">
+
+    <span
+      class="count-number"
+      id="countdown"
+    >
+      —
+    </span>
+
+    <span class="count-text">
+      DAYS TO GO
+    </span>
+
+  </div>
+
+</section>
+
+
+<main class="content">
+
+
+<div class="section-title">
+  TRAVELLERS · 8
+</div>
+
+
+<div class="members">
+
+  <div class="member">
+    <div class="avatar">N</div>
+    Nikki
+  </div>
+
+  <div class="member">
+    <div class="avatar">D</div>
+    Danny
+  </div>
+
+  <div class="member">
+    <div class="avatar">K</div>
+    Kelly
+  </div>
+
+  <div class="member">
+    <div class="avatar">W</div>
+    Wade
+  </div>
+
+  <div class="member">
+    <div class="avatar">P</div>
+    Phila
+  </div>
+
+  <div class="member">
+    <div class="avatar">E</div>
+    Eliana
+  </div>
+
+  <div class="member">
+    <div class="avatar">J</div>
+    Jayan
+  </div>
+
+  <div class="member">
+    <div class="avatar">K</div>
+    Kaia
+  </div>
+
+</div>
+
+
+<div class="section-title">
+  PORT MACQUARIE WEATHER
+</div>
+
+
+<div class="weather-card">
+
+  <div class="weather-top">
+
+    <div class="weather-location">
+      Port Macquarie
+    </div>
+
+    <div class="weather-icon">
+      ☀️
+    </div>
+
+  </div>
+
+  <div class="weather-message">
+    Live trip forecast will appear here closer to departure.
+  </div>
+
+</div>
+
+
+<div class="section-title">
+  OUR TRIP
+</div>
+
+
+<div class="menu">
+
+  <div
+    class="menu-card"
+    onclick="comingSoon('Itinerary')"
+  >
+
+    <div class="menu-icon">
+      📅
+    </div>
+
+    <div class="menu-title">
+      Itinerary
+    </div>
+
+    <div class="menu-sub">
+      Day 1 · Day 2 · Day 3
+    </div>
+
+  </div>
+
+
+  <div
+    class="menu-card"
+    onclick="comingSoon('Trip Map')"
+  >
+
+    <div class="menu-icon">
+      🗺️
+    </div>
+
+    <div class="menu-title">
+      Trip Map
+    </div>
+
+    <div class="menu-sub">
+      Places & navigation
+    </div>
+
+  </div>
+
+
+  <div
+    class="menu-card"
+    onclick="comingSoon('Trip Board')"
+  >
+
+    <div class="menu-icon">
+      📝
+    </div>
+
+    <div class="menu-title">
+      Trip Board
+    </div>
+
+    <div class="menu-sub">
+      Notes & ideas
+    </div>
+
+  </div>
+
+
+  <div
+    class="menu-card"
+    onclick="comingSoon('To-do')"
+  >
+
+    <div class="menu-icon">
+      ✓
+    </div>
+
+    <div class="menu-title">
+      To-do
+    </div>
+
+    <div class="menu-sub">
+      Things to organise
+    </div>
+
+  </div>
+
+</div>
+
+
+<button
+  class="share"
+  onclick="shareTrip()"
+>
+  Share Trip
+</button>
+
+
+<div class="footer">
+  Port 2026 · Made for our crew
+</div>
+
+
+</main>
+
+</div>
+
+
+<script>
+
+/* AUTOMATIC COUNTDOWN */
+
+const tripDate =
+  new Date("2026-10-03T09:00:00");
+
+const today =
+  new Date();
+
+const difference =
+  tripDate - today;
+
+const days =
+  Math.max(
+    0,
+    Math.ceil(
+      difference / (1000 * 60 * 60 * 24)
+    )
+  );
+
+document.getElementById("countdown")
+  .textContent = days;
+
+
+/* TEMPORARY MENU */
+
+function comingSoon(feature) {
+  alert(feature + " is coming next!");
+}
+
+
+/* SHARE */
+
+async function shareTrip() {
+
+  const shareData = {
+    title: "Port 2026",
+    text:
+      "Our 2026 Labour Day trip to Port Macquarie",
+    url: window.location.href
+  };
+
+  if (navigator.share) {
+
+    try {
+      await navigator.share(shareData);
+    } catch (error) {
+      console.log("Share cancelled");
+    }
+
+  } else {
+
+    try {
+
+      await navigator.clipboard.writeText(
+        window.location.href
+      );
+
+      alert("Trip link copied!");
+
+    } catch (error) {
+
+      alert(
+        "Copy this link: " +
+        window.location.href
+      );
+
+    }
+
+  }
+
+}
+
+</script>
+
+</body>
+</html>
