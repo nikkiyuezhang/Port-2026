@@ -327,8 +327,71 @@ Port 2026 · Trip Board
 
 /* =========================
    PORT 2026 SHARED BOARD
-   Cloudflare D1 version
+   D1 + Trip Code
 ========================= */
+
+
+const TRIP_CODE_KEY =
+  "port2026_trip_code";
+
+
+function getTripCode() {
+
+  return sessionStorage.getItem(
+    TRIP_CODE_KEY
+  ) || "";
+
+}
+
+
+function saveTripCode(code) {
+
+  sessionStorage.setItem(
+    TRIP_CODE_KEY,
+    code
+  );
+
+}
+
+
+function clearTripCode() {
+
+  sessionStorage.removeItem(
+    TRIP_CODE_KEY
+  );
+
+}
+
+
+function askForTripCode() {
+
+  const code =
+    prompt(
+      "Enter the Port 2026 Trip Code:"
+    );
+
+
+  if (code === null) {
+    return null;
+  }
+
+
+  const cleanCode =
+    code.trim();
+
+
+  if (!cleanCode) {
+
+    alert(
+      "Trip Code is required."
+    );
+
+    return null;
+  }
+
+
+  return cleanCode;
+}
 
 
 function initials(name) {
@@ -359,13 +422,9 @@ function formatTime(timestamp) {
 
   if (!timestamp) return "";
 
-  /*
-    D1 CURRENT_TIMESTAMP is stored in UTC.
-    Add Z so the browser correctly converts it
-    to the viewer's local time.
-  */
 
   let value = timestamp;
+
 
   if (
     !value.endsWith("Z") &&
@@ -396,7 +455,8 @@ function formatTime(timestamp) {
 
 
 /* =========================
-   LOAD SHARED NOTES
+   LOAD NOTES
+   No Trip Code required
 ========================= */
 
 async function loadNotes() {
@@ -571,7 +631,97 @@ function renderNotes(notes) {
 
 
 /* =========================
-   ADD SHARED NOTE
+   SEND AUTHENTICATED REQUEST
+========================= */
+
+async function boardWriteRequest(
+  url,
+  options
+) {
+
+  let code =
+    getTripCode();
+
+
+  if (!code) {
+
+    code =
+      askForTripCode();
+
+
+    if (!code) {
+      return null;
+    }
+
+  }
+
+
+  options.headers = {
+    ...(options.headers || {}),
+    "X-Trip-Code": code
+  };
+
+
+  let response =
+    await fetch(
+      url,
+      options
+    );
+
+
+  /*
+    Wrong or expired code:
+    ask once more.
+  */
+
+  if (response.status === 401) {
+
+    clearTripCode();
+
+
+    alert(
+      "That Trip Code wasn't correct. Please try again."
+    );
+
+
+    code =
+      askForTripCode();
+
+
+    if (!code) {
+      return null;
+    }
+
+
+    options.headers = {
+      ...(options.headers || {}),
+      "X-Trip-Code": code
+    };
+
+
+    response =
+      await fetch(
+        url,
+        options
+      );
+
+  }
+
+
+  if (response.ok) {
+
+    saveTripCode(code);
+
+  }
+
+
+  return response;
+
+}
+
+
+/* =========================
+   ADD NOTE
 ========================= */
 
 async function addNote() {
@@ -618,7 +768,7 @@ async function addNote() {
   try {
 
     const response =
-      await fetch(
+      await boardWriteRequest(
         "/api/board",
         {
           method: "POST",
@@ -635,6 +785,11 @@ async function addNote() {
             })
         }
       );
+
+
+    if (!response) {
+      return;
+    }
 
 
     const data =
@@ -668,6 +823,7 @@ async function addNote() {
       "Couldn't post this note. Please try again."
     );
 
+
   } finally {
 
     button.disabled = false;
@@ -681,7 +837,7 @@ async function addNote() {
 
 
 /* =========================
-   DELETE SHARED NOTE
+   DELETE NOTE
 ========================= */
 
 async function deleteNote(id) {
@@ -700,13 +856,18 @@ async function deleteNote(id) {
   try {
 
     const response =
-      await fetch(
+      await boardWriteRequest(
         "/api/board?id=" +
         encodeURIComponent(id),
         {
           method: "DELETE"
         }
       );
+
+
+    if (!response) {
+      return;
+    }
 
 
     const data =
@@ -749,8 +910,6 @@ async function deleteNote(id) {
 loadNotes();
 
 </script>
-
-
 
 </body>
 </html>
