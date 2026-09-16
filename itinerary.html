@@ -248,21 +248,26 @@ h1 {
 
 <div class="day-tabs">
 
-<button class="day-tab active"
-onclick="showDay(1)">
-Day 1
+<button
+  class="day-tab active"
+  data-day="1"
+  onclick="showDay(1)">
+  Day 1
 </button>
 
-<button class="day-tab"
-onclick="showDay(2)">
-Day 2
+<button
+  class="day-tab"
+  data-day="2"
+  onclick="showDay(2)">
+  Day 2
 </button>
 
-<button class="day-tab"
-onclick="showDay(3)">
-Day 3
+<button
+  class="day-tab"
+  data-day="3"
+  onclick="showDay(3)">
+  Day 3
 </button>
-
 </div>
 
 
@@ -342,28 +347,38 @@ let itineraryItems = [];
 
 function showDay(dayNumber) {
 
-  const days =
-    document.querySelectorAll(".day");
-
-  const tabs =
-    document.querySelectorAll(".day-tab");
-
-  days.forEach(day =>
-    day.classList.remove("active")
-  );
-
-  tabs.forEach(tab =>
-    tab.classList.remove("active")
-  );
+  document
+    .querySelectorAll(".day")
+    .forEach(function(day) {
+      day.classList.remove("active");
+    });
 
   document
-    .getElementById("day" + dayNumber)
-    .classList.add("active");
+    .querySelectorAll(".day-tab")
+    .forEach(function(tab) {
+      tab.classList.remove("active");
+    });
 
-  tabs[dayNumber - 1]
-    .classList.add("active");
+  const selectedDay =
+    document.getElementById(
+      "day" + dayNumber
+    );
+
+  if (selectedDay) {
+    selectedDay.classList.add("active");
+  }
+
+  const selectedTab =
+    document.querySelector(
+      '.day-tab[data-day="' +
+      dayNumber +
+      '"]'
+    );
+
+  if (selectedTab) {
+    selectedTab.classList.add("active");
+  }
 }
-
 
 /* =========================
    LOAD ITINERARY FROM D1
