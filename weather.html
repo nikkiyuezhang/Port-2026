@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#17324d">
+
+<title>Port 2026 · Weather</title>
+
+<style>
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  background: #f3f5f7;
+  color: #18222c;
+}
+
+.app {
+  max-width: 520px;
+  margin: auto;
+  min-height: 100vh;
+  background: white;
+}
+
+/* HEADER */
+
+.header {
+  background: linear-gradient(160deg, #17324d, #245a70);
+  color: white;
+  padding: 28px 22px 27px;
+}
+
+.back {
+  display: inline-block;
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  margin-bottom: 22px;
+  opacity: .85;
+}
+
+.label {
+  font-size: 11px;
+  letter-spacing: 1.6px;
+  opacity: .7;
+}
+
+h1 {
+  margin: 6px 0;
+  font-size: 34px;
+}
+
+.subtitle {
+  font-size: 14px;
+  opacity: .8;
+}
+
+/* CONTENT */
+
+.content {
+  padding: 22px;
+}
+
+/* CURRENT WEATHER */
+
+.current-card {
+  background: #eef6fa;
+  border-radius: 20px;
+  padding: 21px;
+  margin-bottom: 22px;
+}
+
+.current-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.current-location {
+  font-size: 12px;
+  font-weight: 700;
+  color: #687c87;
+  letter-spacing: .8px;
+}
+
+.weather-icon {
+  font-size: 45px;
+}
+
+.temperature {
+  font-size: 48px;
+  font-weight: 750;
+  margin-top: 5px;
+}
+
+.condition {
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.feels-like {
+  margin-top: 5px;
+  font-size: 12px;
+  color: #71808a;
+}
+
+/* TRIP FORECAST */
+
+.section-title {
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 1px;
+  color: #71808a;
+  margin-bottom: 12px;
+}
+
+.trip-card {
+  border: 1px solid #e7ebed;
+  border-radius: 18px;
+  padding: 17px;
+  margin-bottom: 22px;
+}
+
+.trip-waiting {
+  text-align: center;
+  padding: 12px 5px;
+}
+
+.trip-waiting-icon {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.trip-waiting-title {
+  font-size: 16px;
+  font-weight: 750;
+}
+
+.trip-waiting-text {
+  margin-top: 7px;
+  color: #71808a;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* FORECAST */
+
+.forecast-list {
+  display: grid;
+  gap: 8px;
+}
+
+.forecast-day {
+  display: grid;
+  grid-template-columns: 1fr 45px 70px 60px;
+  align-items: center;
+  padding: 13px 4px;
+  border-bottom: 1px solid #edf0f1;
+}
+
+.forecast-day:last-child {
+  border-bottom: none;
+}
+
+.forecast-date {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.forecast-date small {
+  display: block;
+  margin-top: 3px;
+  color: #849098;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.forecast-icon {
+  font-size: 24px;
+  text-align: center;
+}
+
+.forecast-temp {
+  text-align: right;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.forecast-rain {
+  text-align: right;
+  color: #4d7487;
+  font-size: 11px;
+}
+
+/* ADVENTURE CHECK */
+
+.adventure-card {
+  background: #fff7e6;
+  border-radius: 18px;
+  padding: 17px;
+  margin-bottom: 22px;
+}
+
+.adventure-title {
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.adventure-text {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #776b4e;
+  line-height: 1.5;
+}
+
+/* STATUS */
+
+.status {
+  font-size: 11px;
+  color: #99a2a7;
+  text-align: center;
+  margin-top: 16px;
+}
+
+.error {
+  background: #fff0f0;
+  color: #8a4a4a;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+/* FOOTER */
+
+.footer {
+  text-align: center;
+  color: #a0a5a9;
+  font-size: 11px;
+  padding: 5px 0 30px;
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div class="app">
+
+<header class="header">
+
+<a class="back" href="index.html">
+← Port 2026
+</a>
+
+<div class="label">
+PORT MACQUARIE
+</div>
+
+<h1>Weather</h1>
+
+<div class="subtitle">
+Live conditions & trip forecast
+</div>
+
+</header>
+
+
+<main class="content">
+
+
+<!-- CURRENT WEATHER -->
+
+<div class="section-title">
+RIGHT NOW
+</div>
+
+<div class="current-card">
+
+<div class="current-top">
+
+<div>
+
+<div class="current-location">
+PORT MACQUARIE
+</div>
+
+<div class="temperature" id="currentTemp">
+--°
+</div>
+
+<div class="condition" id="currentCondition">
+Loading weather...
+</div>
+
+<div class="feels-like" id="feelsLike">
+Please wait
+</div>
+
+</div>
+
+<div class="weather-icon" id="currentIcon">
+⛅
+</div>
+
+</div>
+
+</div>
+
+
+<!-- TRIP WEATHER -->
+
+<div class="section-title">
+OUR TRIP · 3–5 OCTOBER
+</div>
+
+<div class="trip-card" id="tripForecast">
+
+<div class="trip-waiting">
+
+<div class="trip-waiting-icon">
+🧳
+</div>
+
+<div class="trip-waiting-title">
+Checking forecast window...
+</div>
+
+<div class="trip-waiting-text">
+We’ll automatically show the Port 2026 forecast
+when the trip enters the forecast range.
+</div>
+
+</div>
+
+</div>
+
+
+<!-- NEXT DAYS -->
+
+<div class="section-title">
+NEXT 7 DAYS
+</div>
+
+<div class="trip-card">
+
+<div class="forecast-list" id="forecastList">
+
+<div class="trip-waiting-text">
+Loading forecast...
+</div>
+
+</div>
+
+</div>
+
+
+<!-- WILDNETS -->
+
+<div class="adventure-card">
+
+<div class="adventure-title">
+🌳 WildNets Weather Check
+</div>
+
+<div class="adventure-text" id="wildnetsCheck">
+
+WildNets is planned for Monday 5 October and is weather dependent.
+We’ll automatically highlight the forecast here when the date gets closer.
+
+</div>
+
+</div>
+
+
+<div class="status" id="status">
+Updating weather...
+</div>
+
+
+<div class="footer">
+Port 2026 · Weather updates automatically
+</div>
+
+
+</main>
+
+</div>
+
+
+<script>
+
+/* PORT MACQUARIE */
+
+const latitude = -31.43;
+const longitude = 152.91;
+
+const tripDates = [
+  "2026-10-03",
+  "2026-10-04",
+  "2026-10-05"
+];
+
+
+/* WEATHER CODE */
+
+function weatherInfo(code) {
+
+  if (code === 0)
+    return ["☀️", "Clear sky"];
+
+  if (code === 1)
+    return ["🌤️", "Mainly clear"];
+
+  if (code === 2)
+    return ["⛅", "Partly cloudy"];
+
+  if (code === 3)
+    return ["☁️", "Overcast"];
+
+  if (code === 45 || code === 48)
+    return ["🌫️", "Fog"];
+
+  if (code >= 51 && code <= 57)
+    return ["🌦️", "Drizzle"];
+
+  if (code >= 61 && code <= 67)
+    return ["🌧️", "Rain"];
+
+  if (code >= 71 && code <= 77)
+    return ["❄️", "Snow"];
+
+  if (code >= 80 && code <= 82)
+    return ["🌦️", "Rain showers"];
+
+  if (code >= 95)
+    return ["⛈️", "Thunderstorm"];
+
+  return ["🌤️", "Mixed conditions"];
+}
+
+
+/* DATE FORMAT */
+
+function formatDate(dateString) {
+
+  const date =
+    new Date(dateString + "T12:00:00");
+
+  return date.toLocaleDateString(
+    "en-AU",
+    {
+      weekday: "short",
+      day: "numeric",
+      month: "short"
+    }
+  );
+}
+
+
+/* FORECAST ROW */
+
+function createForecastRow(
+  date,
+  code,
+  max,
+  min,
+  rain
+) {
+
+  const info = weatherInfo(code);
+
+  return `
+  <div class="forecast-day">
+
+    <div class="forecast-date">
+      ${formatDate(date)}
+      <small>${info[1]}</small>
+    </div>
+
+    <div class="forecast-icon">
+      ${info[0]}
+    </div>
+
+    <div class="forecast-temp">
+      ${Math.round(max)}° /
+      ${Math.round(min)}°
+    </div>
+
+    <div class="forecast-rain">
+      💧 ${rain ?? 0}%
+    </div>
+
+  </div>
+  `;
+}
+
+
+/* LOAD WEATHER */
+
+async function loadWeather() {
+
+  const url =
+    `https://api.open-meteo.com/v1/forecast` +
+    `?latitude=${latitude}` +
+    `&longitude=${longitude}` +
+    `&current=temperature_2m,apparent_temperature,weather_code` +
+    `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max` +
+    `&timezone=Australia%2FSydney` +
+    `&forecast_days=16`;
+
+  try {
+
+    const response =
+      await fetch(url);
+
+    if (!response.ok) {
+      throw new Error("Weather service unavailable");
+    }
+
+    const data =
+      await response.json();
+
+
+    /* CURRENT */
+
+    const currentInfo =
+      weatherInfo(data.current.weather_code);
+
+    document.getElementById(
+      "currentTemp"
+    ).textContent =
+      Math.round(
+        data.current.temperature_2m
+      ) + "°";
+
+    document.getElementById(
+      "currentCondition"
+    ).textContent =
+      currentInfo[1];
+
+    document.getElementById(
+      "currentIcon"
+    ).textContent =
+      currentInfo[0];
+
+    document.getElementById(
+      "feelsLike"
+    ).textContent =
+      "Feels like " +
+      Math.round(
+        data.current.apparent_temperature
+      ) +
+      "°C";
+
+
+    /* NEXT 7 DAYS */
+
+    let forecastHTML = "";
+
+    const daysToShow =
+      Math.min(
+        7,
+        data.daily.time.length
+      );
+
+    for (
+      let i = 0;
+      i < daysToShow;
+      i++
+    ) {
+
+      forecastHTML +=
+        createForecastRow(
+          data.daily.time[i],
+          data.daily.weather_code[i],
+          data.daily.temperature_2m_max[i],
+          data.daily.temperature_2m_min[i],
+          data.daily.precipitation_probability_max[i]
+        );
+    }
+
+    document.getElementById(
+      "forecastList"
+    ).innerHTML =
+      forecastHTML;
+
+
+    /* TRIP FORECAST */
+
+    let tripHTML = "";
+
+    let tripDaysFound = 0;
+
+    tripDates.forEach(
+      tripDate => {
+
+        const index =
+          data.daily.time.indexOf(
+            tripDate
+          );
+
+        if (index !== -1) {
+
+          tripDaysFound++;
+
+          tripHTML +=
+            createForecastRow(
+              data.daily.time[index],
+              data.daily.weather_code[index],
+              data.daily.temperature_2m_max[index],
+              data.daily.temperature_2m_min[index],
+              data.daily.precipitation_probability_max[index]
+            );
+        }
+
+      }
+    );
+
+
+    if (tripDaysFound > 0) {
+
+      document.getElementById(
+        "tripForecast"
+      ).innerHTML =
+        `<div class="forecast-list">
+          ${tripHTML}
+        </div>`;
+
+    } else {
+
+      const firstForecast =
+        data.daily.time[0];
+
+      const lastForecast =
+        data.daily.time[
+          data.daily.time.length - 1
+        ];
+
+      document.getElementById(
+        "tripForecast"
+      ).innerHTML = `
+
+        <div class="trip-waiting">
+
+          <div class="trip-waiting-icon">
+            📅
+          </div>
+
+          <div class="trip-waiting-title">
+            Forecast coming soon
+          </div>
+
+          <div class="trip-waiting-text">
+
+            The trip is not yet inside the reliable forecast window.
+
+            <br><br>
+
+            Current forecast coverage:<br>
+            <strong>
+              ${formatDate(firstForecast)}
+              —
+              ${formatDate(lastForecast)}
+            </strong>
+
+            <br><br>
+
+            This page will update automatically
+            as 3–5 October gets closer.
+
+          </div>
+
+        </div>
+      `;
+    }
+
+
+    /* WILDNETS CHECK */
+
+    const wildnetsIndex =
+      data.daily.time.indexOf(
+        "2026-10-05"
+      );
+
+    if (wildnetsIndex !== -1) {
+
+      const rain =
+        data.daily
+        .precipitation_probability_max[
+          wildnetsIndex
+        ];
+
+      const code =
+        data.daily.weather_code[
+          wildnetsIndex
+        ];
+
+      const info =
+        weatherInfo(code);
+
+      document.getElementById(
+        "wildnetsCheck"
+      ).innerHTML = `
+
+        Monday 5 October:
+        <strong>${info[0]} ${info[1]}</strong>
+
+        <br>
+
+        Maximum rain probability:
+        <strong>${rain ?? 0}%</strong>
+
+        <br><br>
+
+        Check again closer to the activity
+        before making the final call.
+
+      `;
+
+    }
+
+
+    /* STATUS */
+
+    const updated =
+      new Date();
+
+    document.getElementById(
+      "status"
+    ).textContent =
+      "Last checked " +
+      updated.toLocaleTimeString(
+        "en-AU",
+        {
+          hour: "numeric",
+          minute: "2-digit"
+        }
+      );
+
+  }
+
+  catch (error) {
+
+    document.getElementById(
+      "status"
+    ).innerHTML = `
+
+      <div class="error">
+        Weather couldn't be loaded right now.
+        Please refresh and try again.
+      </div>
+
+    `;
+
+  }
+
+}
+
+
+loadWeather();
+
+</script>
+
+</body>
+</html>
