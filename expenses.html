@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1.0">
+
+<title>Trip Expenses · Port 2026</title>
+
+<style>
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  background: #f4f6f8;
+  color: #17324d;
+}
+
+.app {
+  max-width: 520px;
+  margin: auto;
+  min-height: 100vh;
+  background: white;
+}
+
+.header {
+  background: #17324d;
+  color: white;
+  padding: 22px 20px 24px;
+}
+
+.back {
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  opacity: .85;
+}
+
+.header h1 {
+  margin: 14px 0 4px;
+  font-size: 28px;
+}
+
+.header p {
+  margin: 0;
+  opacity: .75;
+  font-size: 14px;
+}
+
+.content {
+  padding: 18px;
+}
+
+
+/* SUMMARY */
+
+.summary {
+  display: grid;
+  grid-template-columns:
+    repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.summary-card {
+  background: #f3f6f8;
+  border-radius: 14px;
+  padding: 14px 8px;
+  text-align: center;
+}
+
+.summary-label {
+  font-size: 11px;
+  color: #718096;
+  margin-bottom: 6px;
+}
+
+.summary-value {
+  font-weight: 700;
+  font-size: 17px;
+}
+
+
+/* SETTLEMENT */
+
+.settlement {
+  background: #eaf4ee;
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 20px;
+}
+
+.settlement-title {
+  font-size: 12px;
+  color: #5f7567;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.settlement-main {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.settlement-note {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #6b7d70;
+  line-height: 1.4;
+}
+
+
+/* FAMILY KEY */
+
+.family-key {
+  background: #f7f8fa;
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 20px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #66788a;
+}
+
+.family-key strong {
+  color: #17324d;
+}
+
+
+/* FORM */
+
+.section-title {
+  font-size: 17px;
+  font-weight: 700;
+  margin:
+    0 0 12px;
+}
+
+.form-card {
+  border: 1px solid #e5e9ed;
+  border-radius: 16px;
+  padding: 15px;
+  margin-bottom: 24px;
+}
+
+label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  margin:
+    0 0 6px;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 12px;
+  border:
+    1px solid #d8dee4;
+  border-radius: 10px;
+  font-size: 16px;
+  background: white;
+  margin-bottom: 13px;
+  color: #17324d;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: #17324d;
+}
+
+.row {
+  display: grid;
+  grid-template-columns:
+    1fr 1fr;
+  gap: 10px;
+}
+
+.add-button {
+  width: 100%;
+  border: 0;
+  background: #17324d;
+  color: white;
+  border-radius: 11px;
+  padding: 13px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+
+/* EXPENSE LIST */
+
+.expense {
+  border-bottom:
+    1px solid #edf0f2;
+  padding:
+    14px 2px;
+}
+
+.expense-top {
+  display: flex;
+  justify-content:
+    space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.expense-name {
+  font-weight: 650;
+  font-size: 15px;
+}
+
+.expense-amount {
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.expense-meta {
+  margin-top: 5px;
+  color: #788795;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.expense-bottom {
+  display: flex;
+  justify-content:
+    space-between;
+  align-items: center;
+  margin-top: 7px;
+}
+
+.expense-date {
+  font-size: 11px;
+  color: #a0aab3;
+}
+
+.delete {
+  border: 0;
+  background: none;
+  color: #a0aab3;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+.empty {
+  text-align: center;
+  padding: 30px 15px;
+  color: #8a98a5;
+  font-size: 14px;
+}
+
+.footer-space {
+  height: 35px;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<div class="app">
+
+
+  <div class="header">
+
+    <a
+      class="back"
+      href="index.html">
+      ← Back
+    </a>
+
+    <h1>Trip Expenses</h1>
+
+    <p>
+      Port 2026 · Family AA
+    </p>
+
+  </div>
+
+
+  <div class="content">
+
+
+    <!-- SUMMARY -->
+
+    <div class="summary">
+
+      <div class="summary-card">
+
+        <div class="summary-label">
+          TOTAL
+        </div>
+
+        <div
+          class="summary-value"
+          id="totalSpent">
+          $0.00
+        </div>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <div class="summary-label">
+          FAMILY 1 PAID
+        </div>
+
+        <div
+          class="summary-value"
+          id="family1Paid">
+          $0.00
+        </div>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <div class="summary-label">
+          FAMILY 2 PAID
+        </div>
+
+        <div
+          class="summary-value"
+          id="family2Paid">
+          $0.00
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- SETTLEMENT -->
+
+    <div
+      class="settlement"
+      id="settlement">
+
+      <div class="settlement-title">
+        SETTLEMENT
+      </div>
+
+      <div
+        class="settlement-main"
+        id="settlementMain">
+        All square
+      </div>
+
+      <div
+        class="settlement-note"
+        id="settlementNote">
+        Add expenses and we'll work out the final balance.
+      </div>
+
+    </div>
+
+
+    <!-- FAMILY KEY -->
+
+    <div class="family-key">
+
+      <strong>Family 1</strong>
+      · Danny, Nikki, Jayan & Kaia
+
+      <br>
+
+      <strong>Family 2</strong>
+      · Kelly, Wade, Phila & Eliana
+
+    </div>
+
+
+    <!-- ADD EXPENSE -->
+
+    <h2 class="section-title">
+      Add Expense
+    </h2>
+
+
+    <div class="form-card">
+
+      <label for="description">
+        What was it?
+      </label>
+
+      <input
+        id="description"
+        type="text"
+        maxlength="100"
+        placeholder="e.g. Dinner">
+
+
+      <label for="amount">
+        Amount
+      </label>
+
+      <input
+        id="amount"
+        type="number"
+        min="0.01"
+        step="0.01"
+        inputmode="decimal"
+        placeholder="$0.00">
+
+
+      <div class="row">
+
+
+        <div>
+
+          <label for="paidBy">
+            Paid by
+          </label>
+
+          <select id="paidBy">
+
+            <option value="family1">
+              Family 1
+            </option>
+
+            <option value="family2">
+              Family 2
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div>
+
+          <label for="splitType">
+            Split between
+          </label>
+
+          <select id="splitType">
+
+            <option value="both">
+              Both · 50/50
+            </option>
+
+            <option value="family1">
+              Family 1 only
+            </option>
+
+            <option value="family2">
+              Family 2 only
+            </option>
+
+          </select>
+
+        </div>
+
+
+      </div>
+
+
+      <button
+        class="add-button"
+        onclick="addExpense()">
+
+        Add expense
+
+      </button>
+
+    </div>
+
+
+    <!-- EXPENSES -->
+
+    <h2 class="section-title">
+      Expenses
+    </h2>
+
+
+    <div id="expenseList">
+
+      <div class="empty">
+        Loading expenses...
+      </div>
+
+    </div>
+
+
+    <div class="footer-space"></div>
+
+
+  </div>
+
+</div>
+
+
+<script>
+
+/* =========================
+   TRIP CODE
+========================= */
+
+const TRIP_CODE_KEY =
+  "port2026_trip_code";
+
+
+function getTripCode() {
+
+  return sessionStorage.getItem(
+    TRIP_CODE_KEY
+  ) || "";
+
+}
+
+
+function saveTripCode(code) {
+
+  sessionStorage.setItem(
+    TRIP_CODE_KEY,
+    code
+  );
+
+}
+
+
+function clearTripCode() {
+
+  sessionStorage.removeItem(
+    TRIP_CODE_KEY
+  );
+
+}
+
+
+function askForTripCode() {
+
+  const code =
+    prompt(
+      "Enter the Port 2026 Trip Code:"
+    );
+
+
+  if (code === null) {
+    return null;
+  }
+
+
+  const cleanCode =
+    code.trim();
+
+
+  if (!cleanCode) {
+
+    alert(
+      "Trip Code is required."
+    );
+
+    return null;
+
+  }
+
+
+  return cleanCode;
+}
+
+
+/* =========================
+   HELPERS
+========================= */
+
+function money(value) {
+
+  return "$" +
+    Number(value || 0)
+      .toFixed(2);
+
+}
+
+
+function familyName(value) {
+
+  return value === "family1"
+    ? "Family 1"
+    : "Family 2";
+
+}
+
+
+function splitName(value) {
+
+  if (value === "both") {
+    return "Both families · 50/50";
+  }
+
+  if (value === "family1") {
+    return "Family 1 only";
+  }
+
+  return "Family 2 only";
+
+}
+
+
+function escapeHTML(text) {
+
+  const div =
+    document.createElement("div");
+
+  div.textContent = text;
+
+  return div.innerHTML;
+
+}
+
+
+function formatDate(timestamp) {
+
+  if (!timestamp) {
+    return "";
+  }
+
+
+  let value =
+    timestamp;
+
+
+  if (
+    !value.endsWith("Z") &&
+    !value.includes("+")
+  ) {
+
+    value =
+      value.replace(" ", "T") + "Z";
+
+  }
+
+
+  const date =
+    new Date(value);
+
+
+  return date.toLocaleString(
+    "en-AU",
+    {
+      day: "numeric",
+      month: "short",
+      hour: "numeric",
+      minute: "2-digit"
+    }
+  );
+
+}
+
+
+/* =========================
+   WRITE REQUEST
+========================= */
+
+async function expenseWriteRequest(
+  url,
+  options
+) {
+
+  let code =
+    getTripCode();
+
+
+  if (!code) {
+
+    code =
+      askForTripCode();
+
+
+    if (!code) {
+      return null;
+    }
+
+  }
+
+
+  options.headers = {
+    ...(options.headers || {}),
+    "X-Trip-Code": code
+  };
+
+
+  let response =
+    await fetch(
+      url,
+      options
+    );
+
+
+  if (response.status === 401) {
+
+    clearTripCode();
+
+
+    alert(
+      "That Trip Code wasn't correct. Please try again."
+    );
+
+
+    code =
+      askForTripCode();
+
+
+    if (!code) {
+      return null;
+    }
+
+
+    options.headers = {
+      ...(options.headers || {}),
+      "X-Trip-Code": code
+    };
+
+
+    response =
+      await fetch(
+        url,
+        options
+      );
+
+  }
+
+
+  if (response.ok) {
+
+    saveTripCode(code);
+
+  }
+
+
+  return response;
+}
+
+
+/* =========================
+   LOAD
+========================= */
+
+async function loadExpenses() {
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/expenses",
+        {
+          cache: "no-store"
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (
+      !response.ok ||
+      !data.success
+    ) {
+
+      throw new Error(
+        data.error ||
+        "Could not load expenses."
+      );
+
+    }
+
+
+    renderExpenses(
+      data.expenses || []
+    );
+
+
+  } catch (error) {
+
+    console.error(error);
+
+
+    document.getElementById(
+      "expenseList"
+    ).innerHTML = `
+
+      <div class="empty">
+        ⚠️ Couldn't load expenses.
+      </div>
+
+    `;
+
+  }
+
+}
+
+
+/* =========================
+   ADD
+========================= */
+
+async function addExpense() {
+
+  const descriptionInput =
+    document.getElementById(
+      "description"
+    );
+
+
+  const amountInput =
+    document.getElementById(
+      "amount"
+    );
+
+
+  const description =
+    descriptionInput.value.trim();
+
+
+  const amount =
+    Number(
+      amountInput.value
+    );
+
+
+  const paidBy =
+    document.getElementById(
+      "paidBy"
+    ).value;
+
+
+  const splitType =
+    document.getElementById(
+      "splitType"
+    ).value;
+
+
+  if (!description) {
+
+    alert(
+      "Add a description first."
+    );
+
+    return;
+
+  }
+
+
+  if (
+    !Number.isFinite(amount) ||
+    amount <= 0
+  ) {
+
+    alert(
+      "Enter a valid amount."
+    );
+
+    return;
+
+  }
+
+
+  try {
+
+    const response =
+      await expenseWriteRequest(
+        "/api/expenses",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+              description,
+              amount,
+              paid_by: paidBy,
+              split_type: splitType
+            })
+        }
+      );
+
+
+    if (!response) {
+      return;
+    }
+
+
+    const data =
+      await response.json();
+
+
+    if (
+      !response.ok ||
+      !data.success
+    ) {
+
+      throw new Error(
+        data.error ||
+        "Could not add expense."
+      );
+
+    }
+
+
+    descriptionInput.value = "";
+
+    amountInput.value = "";
+
+
+    await loadExpenses();
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      "Couldn't add this expense. Please try again."
+    );
+
+  }
+
+}
+
+
+/* =========================
+   DELETE
+========================= */
+
+async function deleteExpense(id) {
+
+  const confirmed =
+    confirm(
+      "Delete this expense?"
+    );
+
+
+  if (!confirmed) {
+    return;
+  }
+
+
+  try {
+
+    const response =
+      await expenseWriteRequest(
+        "/api/expenses?id=" +
+        encodeURIComponent(id),
+        {
+          method: "DELETE"
+        }
+      );
+
+
+    if (!response) {
+      return;
+    }
+
+
+    const data =
+      await response.json();
+
+
+    if (
+      !response.ok ||
+      !data.success
+    ) {
+
+      throw new Error(
+        data.error ||
+        "Could not delete expense."
+      );
+
+    }
+
+
+    await loadExpenses();
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(
+      "Couldn't delete this expense. Please try again."
+    );
+
+  }
+
+}
+
+
+/* =========================
+   CALCULATE AA
+========================= */
+
+function calculateSettlement(
+  expenses
+) {
+
+  let family1Paid = 0;
+  let family2Paid = 0;
+
+  let family1Share = 0;
+  let family2Share = 0;
+
+
+  expenses.forEach(
+    expense => {
+
+      const amount =
+        Number(expense.amount);
+
+
+      /* WHO PAID */
+
+      if (
+        expense.paid_by ===
+        "family1"
+      ) {
+
+        family1Paid += amount;
+
+      } else {
+
+        family2Paid += amount;
+
+      }
+
+
+      /* WHO OWES */
+
+      if (
+        expense.split_type ===
+        "both"
+      ) {
+
+        family1Share +=
+          amount / 2;
+
+        family2Share +=
+          amount / 2;
+
+      }
+
+
+      if (
+        expense.split_type ===
+        "family1"
+      ) {
+
+        family1Share +=
+          amount;
+
+      }
+
+
+      if (
+        expense.split_type ===
+        "family2"
+      ) {
+
+        family2Share +=
+          amount;
+
+      }
+
+    }
+  );
+
+
+  const total =
+    family1Paid +
+    family2Paid;
+
+
+  /*
+    Positive:
+    Family 1 paid more than
+    its fair share.
+
+    Negative:
+    Family 2 paid more.
+  */
+
+  const family1Balance =
+    family1Paid -
+    family1Share;
+
+
+  return {
+    total,
+    family1Paid,
+    family2Paid,
+    family1Share,
+    family2Share,
+    family1Balance
+  };
+
+}
+
+
+/* =========================
+   RENDER
+========================= */
+
+function renderExpenses(
+  expenses
+) {
+
+  const totals =
+    calculateSettlement(
+      expenses
+    );
+
+
+  document.getElementById(
+    "totalSpent"
+  ).textContent =
+    money(totals.total);
+
+
+  document.getElementById(
+    "family1Paid"
+  ).textContent =
+    money(
+      totals.family1Paid
+    );
+
+
+  document.getElementById(
+    "family2Paid"
+  ).textContent =
+    money(
+      totals.family2Paid
+    );
+
+
+  const settlementMain =
+    document.getElementById(
+      "settlementMain"
+    );
+
+
+  const settlementNote =
+    document.getElementById(
+      "settlementNote"
+    );
+
+
+  const balance =
+    totals.family1Balance;
+
+
+  if (
+    Math.abs(balance) < 0.005
+  ) {
+
+    settlementMain.textContent =
+      "All square";
+
+    settlementNote.textContent =
+      "No payment is currently needed between the two families.";
+
+  } else if (balance > 0) {
+
+    settlementMain.textContent =
+      "Family 2 → Family 1 " +
+      money(balance);
+
+    settlementNote.textContent =
+      "Family 1 has paid more than its share.";
+
+  } else {
+
+    settlementMain.textContent =
+      "Family 1 → Family 2 " +
+      money(
+        Math.abs(balance)
+      );
+
+    settlementNote.textContent =
+      "Family 2 has paid more than its share.";
+
+  }
+
+
+  const list =
+    document.getElementById(
+      "expenseList"
+    );
+
+
+  if (expenses.length === 0) {
+
+    list.innerHTML = `
+
+      <div class="empty">
+        No expenses yet.
+        <br>
+        Add the first trip expense above.
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  list.innerHTML =
+    expenses
+      .map(expense => `
+
+        <div class="expense">
+
+          <div class="expense-top">
+
+            <div class="expense-name">
+              ${escapeHTML(
+                expense.description
+              )}
+            </div>
+
+            <div class="expense-amount">
+              ${money(
+                expense.amount
+              )}
+            </div>
+
+          </div>
+
+
+          <div class="expense-meta">
+
+            Paid by
+            <strong>
+              ${familyName(
+                expense.paid_by
+              )}
+            </strong>
+
+            <br>
+
+            ${splitName(
+              expense.split_type
+            )}
+
+          </div>
+
+
+          <div class="expense-bottom">
+
+            <div class="expense-date">
+              ${formatDate(
+                expense.created_at
+              )}
+            </div>
+
+
+            <button
+              class="delete"
+              onclick="
+                deleteExpense(
+                  ${Number(expense.id)}
+                )
+              "
+              aria-label="Delete expense">
+              ×
+            </button>
+
+          </div>
+
+        </div>
+
+      `)
+      .join("");
+
+}
+
+
+/* =========================
+   ENTER KEY
+========================= */
+
+document.getElementById(
+  "amount"
+).addEventListener(
+  "keydown",
+  function(event) {
+
+    if (
+      event.key === "Enter"
+    ) {
+
+      event.preventDefault();
+
+      addExpense();
+
+    }
+
+  }
+);
+
+
+/* =========================
+   START
+========================= */
+
+loadExpenses();
+
+</script>
+
+
+</body>
+</html>
