@@ -530,7 +530,7 @@ function createActivityHTML(item) {
   }
 
 
-  return `
+ return `
     <div class="activity">
 
       <div class="time">
@@ -549,11 +549,26 @@ function createActivityHTML(item) {
 
         ${extraHTML}
 
+        <div class="actions">
+
+          <button
+            class="map-button"
+            onclick="editActivity(${item.id})">
+            ✏️ Edit
+          </button>
+
+          <button
+            class="map-button"
+            onclick="deleteActivity(${item.id})">
+            × Delete
+          </button>
+
+        </div>
+
       </div>
 
     </div>
   `;
-}
 
 
 /* =========================
@@ -756,7 +771,278 @@ async function openAddActivity(dayNumber) {
   }
 }
 
+/* =========================
+   TRIP CODE FOR EDIT / DELETE
+========================= */
 
+function getItineraryTripCode() {
+
+  let tripCode =
+    sessionStorage.getItem(
+      "port2026_trip_code"
+    );
+
+  if (!tripCode) {
+
+    tripCode =
+      prompt(
+        "Enter the Port 2026 Trip Code:"
+      );
+
+    if (!tripCode) {
+      return null;
+    }
+  }
+
+  return tripCode;
+}
+
+
+/* =========================
+   EDIT ACTIVITY
+========================= */
+
+async function editActivity(id) {
+
+  const item =
+    itineraryItems.find(
+      item =>
+        Number(item.id) === Number(id)
+    );
+
+  if (!item) {
+    alert("Activity not found.");
+    return;
+  }
+
+
+  const time =
+    prompt(
+      "Time:",
+      item.time || ""
+    );
+
+  if (time === null) return;
+
+
+  const title =
+    prompt(
+      "Activity:",
+      item.title || ""
+    );
+
+  if (title === null) return;
+
+
+  if (!time.trim() || !title.trim()) {
+
+    alert(
+      "Time and activity are required."
+    );
+
+    return;
+  }
+
+
+  const details =
+    prompt(
+      "Notes (optional):",
+      item.details || ""
+    );
+
+  if (details === null) return;
+
+
+  const location =
+    prompt(
+      "Location (optional):",
+      item.location || ""
+    );
+
+  if (location === null) return;
+
+
+  const tripCode =
+    getItineraryTripCode();
+
+  if (!tripCode) return;
+
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/itinerary",
+        {
+          method: "PATCH",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            "X-Trip-Code":
+              tripCode
+          },
+
+          body: JSON.stringify({
+            id: item.id,
+            day: item.day,
+            time: time.trim(),
+            title: title.trim(),
+            details:
+              details.trim(),
+            location:
+              location.trim()
+          })
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (response.status === 401) {
+
+      sessionStorage.removeItem(
+        "port2026_trip_code"
+      );
+
+      alert(
+        "Incorrect Trip Code. Please try again."
+      );
+
+      return;
+    }
+
+
+    if (!data.success) {
+
+      throw new Error(
+        data.error ||
+        "Could not update activity."
+      );
+    }
+
+
+    sessionStorage.setItem(
+      "port2026_trip_code",
+      tripCode
+    );
+
+
+    await loadItinerary();
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    alert(
+      "Could not update activity."
+    );
+  }
+}
+
+
+/* =========================
+   DELETE ACTIVITY
+========================= */
+
+async function deleteActivity(id) {
+
+  const item =
+    itineraryItems.find(
+      item =>
+        Number(item.id) === Number(id)
+    );
+
+  if (!item) {
+    alert("Activity not found.");
+    return;
+  }
+
+
+  const confirmed =
+    confirm(
+      'Delete "' +
+      item.title +
+      '"?'
+    );
+
+  if (!confirmed) return;
+
+
+  const tripCode =
+    getItineraryTripCode();
+
+  if (!tripCode) return;
+
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/itinerary?id=" +
+        encodeURIComponent(id),
+        {
+          method: "DELETE",
+
+          headers: {
+            "X-Trip-Code":
+              tripCode
+          }
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (response.status === 401) {
+
+      sessionStorage.removeItem(
+        "port2026_trip_code"
+      );
+
+      alert(
+        "Incorrect Trip Code. Please try again."
+      );
+
+      return;
+    }
+
+
+    if (!data.success) {
+
+      throw new Error(
+        data.error ||
+        "Could not delete activity."
+      );
+    }
+
+
+    sessionStorage.setItem(
+      "port2026_trip_code",
+      tripCode
+    );
+
+
+    await loadItinerary();
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    alert(
+      "Could not delete activity."
+    );
+  }
+}
 /* =========================
    START
 ========================= */
