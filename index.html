@@ -353,7 +353,9 @@ h1 {
 </div>
 
 
-<div class="weather-card">
+<div class="weather-card"
+     onclick="window.location.href='weather.html'"
+     style="cursor:pointer;">
 
   <div class="weather-top">
 
@@ -361,14 +363,47 @@ h1 {
       Port Macquarie
     </div>
 
-    <div class="weather-icon">
-      ☀️
+    <div class="weather-icon" id="homeWeatherIcon">
+      ⛅
     </div>
 
   </div>
 
-  <div class="weather-message">
-    Live trip forecast will appear here closer to departure.
+  <div style="
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-top:8px;
+  ">
+
+    <div id="homeTemperature"
+         style="
+           font-size:32px;
+           font-weight:750;
+         ">
+      --°
+    </div>
+
+    <div>
+
+      <div id="homeWeatherCondition"
+           style="
+             font-size:13px;
+             font-weight:650;
+           ">
+        Loading weather...
+      </div>
+
+      <div style="
+        font-size:11px;
+        color:#7b878e;
+        margin-top:3px;
+      ">
+        View forecast →
+      </div>
+
+    </div>
+
   </div>
 
 </div>
@@ -554,7 +589,100 @@ async function shareTrip() {
   }
 
 }
+/* HOME LIVE WEATHER */
 
+function homeWeatherInfo(code) {
+
+  if (code === 0)
+    return ["☀️", "Clear sky"];
+
+  if (code === 1)
+    return ["🌤️", "Mainly clear"];
+
+  if (code === 2)
+    return ["⛅", "Partly cloudy"];
+
+  if (code === 3)
+    return ["☁️", "Overcast"];
+
+  if (code === 45 || code === 48)
+    return ["🌫️", "Fog"];
+
+  if (code >= 51 && code <= 57)
+    return ["🌦️", "Drizzle"];
+
+  if (code >= 61 && code <= 67)
+    return ["🌧️", "Rain"];
+
+  if (code >= 71 && code <= 77)
+    return ["❄️", "Snow"];
+
+  if (code >= 80 && code <= 82)
+    return ["🌦️", "Rain showers"];
+
+  if (code >= 95)
+    return ["⛈️", "Thunderstorm"];
+
+  return ["🌤️", "Mixed conditions"];
+}
+
+
+async function loadHomeWeather() {
+
+  const url =
+    "https://api.open-meteo.com/v1/forecast" +
+    "?latitude=-31.43" +
+    "&longitude=152.91" +
+    "&current=temperature_2m,weather_code" +
+    "&timezone=Australia%2FSydney";
+
+  try {
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error("Weather unavailable");
+    }
+
+    const data = await response.json();
+
+    const info =
+      homeWeatherInfo(
+        data.current.weather_code
+      );
+
+    document.getElementById(
+      "homeTemperature"
+    ).textContent =
+      Math.round(
+        data.current.temperature_2m
+      ) + "°";
+
+    document.getElementById(
+      "homeWeatherIcon"
+    ).textContent =
+      info[0];
+
+    document.getElementById(
+      "homeWeatherCondition"
+    ).textContent =
+      info[1];
+
+  }
+
+  catch (error) {
+
+    document.getElementById(
+      "homeWeatherCondition"
+    ).textContent =
+      "View weather forecast";
+
+  }
+
+}
+
+
+loadHomeWeather();
 </script>
 
 </body>
